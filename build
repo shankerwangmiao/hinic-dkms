@@ -1,0 +1,4 @@
+#!/bin/bash
+ksrc=$1
+shift
+exec make -C "$ksrc" M="$PWD" "$@"

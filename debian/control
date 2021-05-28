@@ -1,0 +1,13 @@
+Source: hinic
+Section: kernel
+Priority: extra
+Maintainer: Miao Wang <shankerwangmiao@gmail.com>
+Build-Depends: debhelper (>= 9), dkms
+Standards-Version: 3.9.4
+Homepage: https://gitee.com/openeuler/kernel/tree/OLK-5.10/drivers/net/ethernet/huawei/hinic
+
+Package: hinic-dkms
+Architecture: all
+Depends: ${misc:Depends}, dkms
+Description: Huawei HiNIC PCI Express Linux driver
+ Huawei HiNIC PCI Express Linux driver

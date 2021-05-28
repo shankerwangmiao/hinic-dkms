@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+name = hinic
+pkgname = $(name)-dkms
+# Parse the package version from the changelog, "borrowed" from acpi_call
+version := $(shell dpkg-parsechangelog | grep '^Version:' | cut -d' ' -f2 |\
+ rev | cut -d- -f2- | rev | cut -d':' -f2)
+
+%:
+	dh $@ --with dkms
+
+build:
+
+override_dh_auto_build:
+
+override_dh_dkms:
+	dh_dkms -p$(pkgname) -V $(version)
