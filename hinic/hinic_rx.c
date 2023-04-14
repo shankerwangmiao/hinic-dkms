@@ -67,7 +67,7 @@ static bool rx_alloc_mapped_page(struct hinic_rxq *rxq,
 		return true;
 
 	/* alloc new page for storage */
-	page = alloc_pages_node(NUMA_NO_NODE, GFP_ATOMIC, nic_dev->page_order);
+	page = dev_alloc_pages(nic_dev->page_order);
 	if (unlikely(!page)) {
 		RXQ_STATS_INC(rxq, alloc_rx_buf_err);
 		return false;
@@ -375,7 +375,7 @@ void hinic_rxq_get_stats(struct hinic_rxq *rxq,
 
 	u64_stats_update_begin(&stats->syncp);
 	do {
-		start = u64_stats_fetch_begin(&rxq_stats->syncp);
+		start = u64_stats_fetch_begin_irq(&rxq_stats->syncp);
 		stats->bytes = rxq_stats->bytes;
 		stats->packets = rxq_stats->packets;
 		stats->errors = rxq_stats->csum_errors +
@@ -384,7 +384,7 @@ void hinic_rxq_get_stats(struct hinic_rxq *rxq,
 		stats->other_errors = rxq_stats->other_errors;
 		stats->dropped = rxq_stats->dropped;
 		stats->rx_buf_empty = rxq_stats->rx_buf_empty;
-	} while (u64_stats_fetch_retry(&rxq_stats->syncp, start));
+	} while (u64_stats_fetch_retry_irq(&rxq_stats->syncp, start));
 	u64_stats_update_end(&stats->syncp);
 }
 
