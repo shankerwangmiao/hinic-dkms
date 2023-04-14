@@ -2,11 +2,11 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hinic
 Source: https://gitee.com/openeuler/kernel/tree/OLK-5.10/drivers/net/ethernet/huawei/hinic
 
-Files: *
+Files: hinic/*
 Copyright: 2017 Huawei Technologies Co., Ltd
 License: GPL-2.0
 
-Files: debian/*
+Files: *
 Copyright: 2021 Miao Wang <shankerwangmiao@gmail.com>
 License: GPL-2+
 

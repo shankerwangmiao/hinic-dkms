@@ -3,18 +3,24 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-name = hinic
-pkgname = $(name)-dkms
-# Parse the package version from the changelog, "borrowed" from acpi_call
-version := $(shell dpkg-parsechangelog | grep '^Version:' | cut -d' ' -f2 |\
- rev | cut -d- -f2- | rev | cut -d':' -f2)
+PKG_VER = $(DEB_VERSION_UPSTREAM)
+MOD_NAME = hinic
+pkgname = $(MOD_NAME)-dkms
 
 %:
 	dh $@ --with dkms
 
-build:
+override_dh_build-indep:
+	echo "CONFIG_HINIC = m" > hinic/Kbuild
+	cat hinic/Makefile >> hinic/Kbuild
 
-override_dh_auto_build:
+override_dh_install-indep:
+	cp -r $(CURDIR)/hinic $(DESTDIR)/usr/src/$(MOD_NAME)-$(PKG_VER)
+	cp $(CURDIR)/debian/dkms_build $(DESTDIR)/usr/src/$(MOD_NAME)-$(PKG_VER)/
+
+override_dh_clean:
+	-rm -rf hinic/Kbuild
+	dh_clean
 
 override_dh_dkms:
-	dh_dkms -p$(pkgname) -V $(version)
+	dh_dkms -p$(pkgname) -V $(PKG_VER)
