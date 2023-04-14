@@ -3,6 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+include /usr/share/dpkg/pkg-info.mk
 PKG_VER = $(DEB_VERSION_UPSTREAM)
 MOD_NAME = hinic
 pkgname = $(MOD_NAME)-dkms
@@ -10,16 +11,16 @@ pkgname = $(MOD_NAME)-dkms
 %:
 	dh $@ --with dkms
 
-override_dh_build-indep:
+override_dh_build:
 	echo "CONFIG_HINIC = m" > hinic/Kbuild
 	cat hinic/Makefile >> hinic/Kbuild
 
-override_dh_install-indep:
-	cp -r $(CURDIR)/hinic $(DESTDIR)/usr/src/$(MOD_NAME)-$(PKG_VER)
-	cp $(CURDIR)/debian/dkms_build $(DESTDIR)/usr/src/$(MOD_NAME)-$(PKG_VER)/
+override_dh_install:
+	sed -e "s/DEB_VERSION_UPSTREAM/$(DEB_VERSION_UPSTREAM)/g" debian/install.in > debian/install
+	dh_install
 
 override_dh_clean:
-	-rm -rf hinic/Kbuild
+	-rm -rf hinic/Kbuild debian/install
 	dh_clean
 
 override_dh_dkms:
