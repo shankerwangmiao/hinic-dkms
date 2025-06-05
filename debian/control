@@ -2,9 +2,9 @@ Source: hinic
 Section: kernel
 Priority: extra
 Maintainer: Miao Wang <shankerwangmiao@gmail.com>
-Build-Depends: debhelper (>= 9), dkms
+Build-Depends: debhelper (>= 9), dh-dkms | dkms
 Standards-Version: 3.9.4
-Homepage: https://gitee.com/openeuler/kernel/tree/OLK-5.10/drivers/net/ethernet/huawei/hinic
+Homepage: https://gitee.com/openeuler/kernel/tree/OLK-6.6/drivers/net/ethernet/huawei/hinic
 
 Package: hinic-dkms
 Architecture: all

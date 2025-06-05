@@ -1,0 +1,682 @@
+From cbcda5536680178805b7185c029e6b84f7a95dae Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 5 Jun 2025 19:04:31 +0800
+Subject: [PATCH] add static specifier to local symbols
+
+To fix the no previous prototype warnings
+---
+ hinic/hinic_cfg.c             |  4 ++--
+ hinic/hinic_cmdq.c            |  2 +-
+ hinic/hinic_dcb.c             | 10 +++++-----
+ hinic/hinic_ethtool.c         |  3 ++-
+ hinic/hinic_hw_mgmt.h         |  1 +
+ hinic/hinic_hwdev.c           | 26 +++++++++++++-------------
+ hinic/hinic_lld.c             | 10 +++++-----
+ hinic/hinic_lld.h             |  5 +++++
+ hinic/hinic_main.c            |  4 ++--
+ hinic/hinic_mbox.c            |  6 +++---
+ hinic/hinic_multi_host_mgmt.c | 20 ++++++++++----------
+ hinic/hinic_nic_cfg.c         |  6 +++---
+ hinic/hinic_nic_io.c          |  6 +++---
+ hinic/hinic_nictool.c         | 18 +++++++-----------
+ hinic/hinic_rx.c              |  6 +++---
+ hinic/hinic_sml_counter.c     |  1 +
+ hinic/hinic_tx.c              |  4 ++--
+ 17 files changed, 68 insertions(+), 64 deletions(-)
+
+diff --git a/hinic/hinic_cfg.c b/hinic/hinic_cfg.c
+index 0c3d362..ca56eb2 100644
+--- a/hinic/hinic_cfg.c
++++ b/hinic/hinic_cfg.c
+@@ -1820,7 +1820,7 @@ bool hinic_func_for_pt(void *hwdev)
+ 		return false;
+ }
+ 
+-int cfg_set_func_sf_en(void *hwdev, u32 enbits, u32 enmask)
++static int cfg_set_func_sf_en(void *hwdev, u32 enbits, u32 enmask)
+ {
+ 	struct hinic_hwdev *dev = hwdev;
+ 	struct nic_misc_func_sf_enbits *func_sf_enbits;
+@@ -1863,7 +1863,7 @@ int cfg_set_func_sf_en(void *hwdev, u32 enbits, u32 enmask)
+ 	return 0;
+ }
+ 
+-int cfg_get_func_sf_en(void *hwdev, u32 *enbits)
++static int cfg_get_func_sf_en(void *hwdev, u32 *enbits)
+ {
+ 	struct nic_misc_func_sf_enbits *func_sf_enbits;
+ 	struct hinic_hwdev *dev = hwdev;
+diff --git a/hinic/hinic_cmdq.c b/hinic/hinic_cmdq.c
+index 277be1c..e08737a 100644
+--- a/hinic/hinic_cmdq.c
++++ b/hinic/hinic_cmdq.c
+@@ -1381,7 +1381,7 @@ static void free_cmdq(struct hinic_hwdev *hwdev, struct hinic_cmdq *cmdq)
+ 	kfree(cmdq->cmd_infos);
+ }
+ 
+-int hinic_set_cmdq_ctxts(struct hinic_hwdev *hwdev)
++static int hinic_set_cmdq_ctxts(struct hinic_hwdev *hwdev)
+ {
+ 	struct hinic_cmdqs *cmdqs = hwdev->cmdqs;
+ 	struct hinic_cmdq_ctxt *cmdq_ctxt, cmdq_ctxt_out = {0};
+diff --git a/hinic/hinic_dcb.c b/hinic/hinic_dcb.c
+index 033549b..d98624f 100644
+--- a/hinic/hinic_dcb.c
++++ b/hinic/hinic_dcb.c
+@@ -59,7 +59,7 @@ u8 hinic_dcb_get_tc(struct hinic_dcb_config *dcb_cfg, int dir, u8 up)
+ 
+ #define UP_MAPPING(prio)	((u8)(1U << ((HINIC_DCB_UP_MAX - 1) - (prio))))
+ 
+-void hinic_dcb_config_init(struct hinic_nic_dev *nic_dev,
++static void hinic_dcb_config_init(struct hinic_nic_dev *nic_dev,
+ 			   struct hinic_dcb_config *dcb_cfg)
+ {
+ 	struct hinic_tc_cfg *tc;
+@@ -92,7 +92,7 @@ void hinic_dcb_config_init(struct hinic_nic_dev *nic_dev,
+ 	dcb_cfg->pfc_state = false;
+ }
+ 
+-void hinic_init_ieee_settings(struct hinic_nic_dev *nic_dev)
++static void hinic_init_ieee_settings(struct hinic_nic_dev *nic_dev)
+ {
+ 	struct hinic_dcb_config *dcb_cfg = &nic_dev->dcb_cfg;
+ 	struct ieee_ets *ets = &nic_dev->hinic_ieee_ets_default;
+@@ -255,7 +255,7 @@ int hinic_dcb_init(struct hinic_nic_dev *nic_dev)
+ 	return 0;
+ }
+ 
+-void hinic_set_prio_tc_map(struct hinic_nic_dev *nic_dev)
++static void hinic_set_prio_tc_map(struct hinic_nic_dev *nic_dev)
+ {
+ 	struct net_device *netdev = nic_dev->netdev;
+ 	u8 prio, tc;
+@@ -1198,7 +1198,7 @@ out:
+ 	return state;
+ }
+ 
+-u8 hinic_dcbnl_set_all(struct net_device *netdev)
++static u8 hinic_dcbnl_set_all(struct net_device *netdev)
+ {
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(netdev);
+ 	struct hinic_dcb_config *dcb_cfg = &nic_dev->dcb_cfg;
+@@ -1598,7 +1598,7 @@ static bool __is_cos_up_map_change(struct hinic_nic_dev *nic_dev, u8 *cos_up)
+ 	return false;
+ }
+ 
+-int __set_cos_up_map(struct hinic_nic_dev *nic_dev, u8 *cos_up)
++static int __set_cos_up_map(struct hinic_nic_dev *nic_dev, u8 *cos_up)
+ {
+ 	struct net_device *netdev;
+ 	u8 state;
+diff --git a/hinic/hinic_ethtool.c b/hinic/hinic_ethtool.c
+index dae540b..9810f54 100644
+--- a/hinic/hinic_ethtool.c
++++ b/hinic/hinic_ethtool.c
+@@ -36,6 +36,7 @@
+ #include "hinic_tx.h"
+ #include "hinic_rx.h"
+ #include "hinic_qp.h"
++#include "hinic_nictool.h"
+ 
+ #ifndef SET_ETHTOOL_OPS
+ #define SET_ETHTOOL_OPS(netdev, ops) \
+@@ -1855,7 +1856,7 @@ static int hinic_run_lp_test(struct hinic_nic_dev *nic_dev, u32 test_time)
+ 	return 0;
+ }
+ 
+-void hinic_lp_test(struct net_device *netdev, struct ethtool_test *eth_test,
++static void hinic_lp_test(struct net_device *netdev, struct ethtool_test *eth_test,
+ 		   u64 *data, u32 test_time)
+ {
+ 	int err = 0;
+diff --git a/hinic/hinic_hw_mgmt.h b/hinic/hinic_hw_mgmt.h
+index d9bea9c..f3f4317 100644
+--- a/hinic/hinic_hw_mgmt.h
++++ b/hinic/hinic_hw_mgmt.h
+@@ -523,6 +523,7 @@ struct irq_info {
+ int hinic_alloc_irqs(void *hwdev, enum hinic_service_type type, u16 req_num,
+ 		     struct irq_info *irq_info_array, u16 *resp_num);
+ void hinic_free_irq(void *hwdev, enum hinic_service_type type, u32 irq_id);
++int hinic_vector_to_irq(void *hwdev, enum hinic_service_type type, int vector);
+ int hinic_alloc_ceqs(void *hwdev, enum hinic_service_type type, int req_num,
+ 		     int *ceq_id_array, int *resp_num);
+ void hinic_free_ceq(void *hwdev, enum hinic_service_type type, int ceq_id);
+diff --git a/hinic/hinic_hwdev.c b/hinic/hinic_hwdev.c
+index cbadbbd..50d5c8f 100644
+--- a/hinic/hinic_hwdev.c
++++ b/hinic/hinic_hwdev.c
+@@ -1058,7 +1058,7 @@ int hinic_msg_to_mgmt_async(void *hwdev, enum hinic_mod_type mod, u8 cmd,
+ }
+ EXPORT_SYMBOL(hinic_msg_to_mgmt_async);
+ 
+-int hinic_msg_to_mgmt_no_ack(void *hwdev, enum hinic_mod_type mod, u8 cmd,
++static int hinic_msg_to_mgmt_no_ack(void *hwdev, enum hinic_mod_type mod, u8 cmd,
+ 			     void *buf_in, u16 in_size)
+ {
+ 	struct hinic_hwdev *dev = hwdev;
+@@ -1975,7 +1975,7 @@ int hinic_get_sdi_mode(struct hinic_hwdev *hwdev, u16 *cur_mode)
+ 	return sdi_mode.status;
+ }
+ 
+-int comm_pf_mbox_handler(void *handle, u16 vf_id, u8 cmd, void *buf_in,
++static int comm_pf_mbox_handler(void *handle, u16 vf_id, u8 cmd, void *buf_in,
+ 			 u16 in_size, void *buf_out, u16 *out_size)
+ {
+ 	int err = 0;
+@@ -2746,7 +2746,7 @@ static int ppf_ht_gpa_set(struct hinic_hwdev *hwdev, struct hinic_page_addr *pg0
+ 	return 0;
+ }
+ 
+-int hinic_ppf_ht_gpa_init(struct hinic_hwdev *hwdev)
++static int hinic_ppf_ht_gpa_init(struct hinic_hwdev *hwdev)
+ {
+ 	int ret;
+ 	int i;
+@@ -2792,7 +2792,7 @@ int hinic_ppf_ht_gpa_init(struct hinic_hwdev *hwdev)
+ 	return 0;
+ }
+ 
+-void hinic_ppf_ht_gpa_deinit(struct hinic_hwdev *hwdev)
++static void hinic_ppf_ht_gpa_deinit(struct hinic_hwdev *hwdev)
+ {
+ 	if (hwdev->page_pa0.virt_addr) {
+ 		dma_free_coherent(hwdev->dev_hdl, HINIC_HT_GPA_PAGE_SIZE,
+@@ -2869,7 +2869,7 @@ int hinic_ppf_tmr_stop(void *hwdev)
+ }
+ EXPORT_SYMBOL(hinic_ppf_tmr_stop);
+ 
+-int mqm_eqm_try_alloc_mem(struct hinic_hwdev *hwdev, u32 page_size,
++static int mqm_eqm_try_alloc_mem(struct hinic_hwdev *hwdev, u32 page_size,
+ 			  u32 page_num)
+ {
+ 	struct hinic_page_addr *page_addr = hwdev->mqm_att.brm_srch_page_addr;
+@@ -2906,7 +2906,7 @@ int mqm_eqm_try_alloc_mem(struct hinic_hwdev *hwdev, u32 page_size,
+ 	return 0;
+ }
+ 
+-int mqm_eqm_alloc_page_mem(struct hinic_hwdev *hwdev)
++static int mqm_eqm_alloc_page_mem(struct hinic_hwdev *hwdev)
+ {
+ 	int ret = 0;
+ 
+@@ -2931,7 +2931,7 @@ int mqm_eqm_alloc_page_mem(struct hinic_hwdev *hwdev)
+ 	return ret;
+ }
+ 
+-void mqm_eqm_free_page_mem(struct hinic_hwdev *hwdev)
++static void mqm_eqm_free_page_mem(struct hinic_hwdev *hwdev)
+ {
+ 	u32 i;
+ 	struct hinic_page_addr *page_addr;
+@@ -2947,7 +2947,7 @@ void mqm_eqm_free_page_mem(struct hinic_hwdev *hwdev)
+ 	}
+ }
+ 
+-int mqm_eqm_set_cfg_2_hw(struct hinic_hwdev *hwdev, u32 valid)
++static int mqm_eqm_set_cfg_2_hw(struct hinic_hwdev *hwdev, u32 valid)
+ {
+ 	struct comm_info_eqm_cfg info_eqm_cfg = {0};
+ 	u16 out_size = sizeof(info_eqm_cfg);
+@@ -2972,7 +2972,7 @@ int mqm_eqm_set_cfg_2_hw(struct hinic_hwdev *hwdev, u32 valid)
+ 
+ #define EQM_DATA_BUF_SIZE	1024
+ 
+-int mqm_eqm_set_page_2_hw(struct hinic_hwdev *hwdev)
++static int mqm_eqm_set_page_2_hw(struct hinic_hwdev *hwdev)
+ {
+ 	struct comm_info_eqm_search_gpa *info;
+ 	struct hinic_page_addr *page_addr;
+@@ -3050,7 +3050,7 @@ set_page_2_hw_end:
+ 	return err;
+ }
+ 
+-int mqm_eqm_init(struct hinic_hwdev *hwdev)
++static int mqm_eqm_init(struct hinic_hwdev *hwdev)
+ {
+ 	struct comm_info_eqm_fix info_eqm_fix = {0};
+ 	u16 len = sizeof(info_eqm_fix);
+@@ -3113,7 +3113,7 @@ err_page:
+ 	return ret;
+ }
+ 
+-void mqm_eqm_deinit(struct hinic_hwdev *hwdev)
++static void mqm_eqm_deinit(struct hinic_hwdev *hwdev)
+ {
+ 	int ret;
+ 
+@@ -4572,7 +4572,7 @@ void hinic_set_pcie_order_cfg(void *handle)
+ 	}
+ }
+ 
+-int _set_led_status(struct hinic_hwdev *hwdev, u8 port,
++static int _set_led_status(struct hinic_hwdev *hwdev, u8 port,
+ 		    enum hinic_led_type type,
+ 		    enum hinic_led_mode mode, u8 reset)
+ {
+@@ -4658,7 +4658,7 @@ int hinic_get_board_info(void *hwdev, struct hinic_board_info *info)
+ }
+ EXPORT_SYMBOL(hinic_get_board_info);
+ 
+-int hinic_get_phy_init_status(void *hwdev,
++static int hinic_get_phy_init_status(void *hwdev,
+ 			      enum phy_init_status_type *init_status)
+ {
+ 	struct hinic_phy_init_status phy_info = {0};
+diff --git a/hinic/hinic_lld.c b/hinic/hinic_lld.c
+index 76ca3fb..a25801a 100644
+--- a/hinic/hinic_lld.c
++++ b/hinic/hinic_lld.c
+@@ -444,7 +444,7 @@ static void hinic_syncfw_timer_handler(struct timer_list *t)
+ 		  jiffies + msecs_to_jiffies(HINIC_SYNFW_TIME_PERIOD));
+ }
+ 
+-void hinic_init_syncfw_timer(struct hinic_pcidev *pci_adapter)
++static void hinic_init_syncfw_timer(struct hinic_pcidev *pci_adapter)
+ {
+ 	if (hinic_get_func_mode(pci_adapter->hwdev) != FUNC_MOD_NORMAL_HOST ||
+ 	    hinic_func_type(pci_adapter->hwdev) != TYPE_PPF)
+@@ -459,7 +459,7 @@ void hinic_init_syncfw_timer(struct hinic_pcidev *pci_adapter)
+ 	add_timer(&pci_adapter->syncfw_time_timer);
+ }
+ 
+-void hinic_destroy_syncfw_timer(struct hinic_pcidev *pci_adapter)
++static void hinic_destroy_syncfw_timer(struct hinic_pcidev *pci_adapter)
+ {
+ 	if (hinic_get_func_mode(pci_adapter->hwdev) != FUNC_MOD_NORMAL_HOST ||
+ 	    hinic_func_type(pci_adapter->hwdev) != TYPE_PPF)
+@@ -547,7 +547,7 @@ static void __version_split(const char *str, int *split_num,
+ 	*split_num = cnt;
+ }
+ 
+-int hinic_version_cmp(char *ver1, char *ver2)
++static int hinic_version_cmp(char *ver1, char *ver2)
+ {
+ 	char ver1_split[MAX_VER_SPLIT_NUM][MAX_VER_FIELD_LEN] = { {0} };
+ 	char ver2_split[MAX_VER_SPLIT_NUM][MAX_VER_FIELD_LEN] = { {0} };
+@@ -1136,7 +1136,7 @@ void *hinic_get_ppf_uld_by_pdev(struct pci_dev *pdev,
+ }
+ EXPORT_SYMBOL(hinic_get_ppf_uld_by_pdev);
+ 
+-void *hinic_get_ppf_hwdev_by_pdev(struct pci_dev *pdev)
++static void *hinic_get_ppf_hwdev_by_pdev(struct pci_dev *pdev)
+ {
+ 	struct hinic_pcidev *pci_adapter;
+ 	struct card_node *chip_node;
+@@ -1893,7 +1893,7 @@ static void send_event_to_dst_pf(struct hinic_pcidev *dev, u16 func_id,
+ 	lld_dev_put();
+ }
+ 
+-void hinic_event_process(void *adapter, struct hinic_event_info *event)
++static void hinic_event_process(void *adapter, struct hinic_event_info *event)
+ {
+ 	struct hinic_pcidev *dev = adapter;
+ 	u16 func_id;
+diff --git a/hinic/hinic_lld.h b/hinic/hinic_lld.h
+index 414dfd1..79c8229 100644
+--- a/hinic/hinic_lld.h
++++ b/hinic/hinic_lld.h
+@@ -125,4 +125,9 @@ bool hinic_is_in_host(void);
+ 
+ bool hinic_is_valid_bar_addr(u64 offset);
+ 
++struct hinic_card_func_info;
++extern void hinic_get_card_func_info_by_card_name(const char *chip_name,
++						  struct hinic_card_func_info
++						  *card_func);
++
+ #endif
+diff --git a/hinic/hinic_main.c b/hinic/hinic_main.c
+index 4151ee5..e96af33 100644
+--- a/hinic/hinic_main.c
++++ b/hinic/hinic_main.c
+@@ -179,7 +179,7 @@ enum hinic_rx_buff_len {
+ 					 NETIF_F_SCTP_CRC | NETIF_F_RXCSUM | \
+ 					 NETIF_F_ALL_TSO)
+ 
+-int hinic_netdev_event(struct notifier_block *notifier,
++static int hinic_netdev_event(struct notifier_block *notifier,
+ 		       unsigned long event, void *ptr)
+ {
+ 	struct net_device *ndev = netdev_notifier_info_to_dev(ptr);
+@@ -3055,7 +3055,7 @@ static void hinic_intr_coalesc_change(struct hinic_nic_dev *nic_dev,
+ 	nic_dev->his_link_speed = speed;
+ }
+ 
+-void nic_event(struct hinic_lld_dev *lld_dev, void *adapter,
++static void nic_event(struct hinic_lld_dev *lld_dev, void *adapter,
+ 	       struct hinic_event_info *event)
+ {
+ 	struct hinic_nic_dev *nic_dev = adapter;
+diff --git a/hinic/hinic_mbox.c b/hinic/hinic_mbox.c
+index aad269f..212ec27 100644
+--- a/hinic/hinic_mbox.c
++++ b/hinic/hinic_mbox.c
+@@ -793,7 +793,7 @@ rcv_mbox_msg_err:
+ 	kfree(rcv_mbox_temp);
+ }
+ 
+-int set_vf_mbox_random_id(struct hinic_hwdev *hwdev, u16 func_id)
++static int set_vf_mbox_random_id(struct hinic_hwdev *hwdev, u16 func_id)
+ {
+ 	struct hinic_mbox_func_to_func *func_to_func = hwdev->func_to_func;
+ 	struct hinic_set_random_id rand_info = {0};
+@@ -843,7 +843,7 @@ static void update_random_id_work_handler(struct work_struct *work)
+ 	kfree(mbox_work);
+ }
+ 
+-bool check_vf_mbox_random_id(struct hinic_mbox_func_to_func *func_to_func,
++static bool check_vf_mbox_random_id(struct hinic_mbox_func_to_func *func_to_func,
+ 			     u8 *header)
+ {
+ 	struct hinic_hwdev *hwdev = func_to_func->hwdev;
+@@ -1006,7 +1006,7 @@ static void write_mbox_msg_attr(struct hinic_mbox_func_to_func *func_to_func,
+ 			     HINIC_FUNC_CSR_MAILBOX_CONTROL_OFF, mbox_ctrl);
+ }
+ 
+-void dump_mox_reg(struct hinic_hwdev *hwdev)
++static void dump_mox_reg(struct hinic_hwdev *hwdev)
+ {
+ 	u32 val;
+ 
+diff --git a/hinic/hinic_multi_host_mgmt.c b/hinic/hinic_multi_host_mgmt.c
+index 25cd46c..4a10c4a 100644
+--- a/hinic/hinic_multi_host_mgmt.c
++++ b/hinic/hinic_multi_host_mgmt.c
+@@ -244,7 +244,7 @@ void detect_host_mode_pre(struct hinic_hwdev *hwdev)
+ 	}
+ }
+ 
+-int __mbox_to_host(struct hinic_hwdev *hwdev, enum hinic_mod_type mod,
++static int __mbox_to_host(struct hinic_hwdev *hwdev, enum hinic_mod_type mod,
+ 		   u8 cmd, void *buf_in, u16 in_size, void *buf_out,
+ 		   u16 *out_size, u32 timeout,
+ 		   enum hinic_mbox_ack_type ack_type)
+@@ -521,7 +521,7 @@ static int __slave_host_sw_func_handler(struct hinic_hwdev *hwdev, u16 pf_idx,
+ 	return err;
+ }
+ 
+-int sw_func_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
++static int sw_func_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 			     void *buf_in, u16 in_size, void *buf_out,
+ 			     u16 *out_size)
+ {
+@@ -544,7 +544,7 @@ int sw_func_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 	return err;
+ }
+ 
+-int __ppf_process_mbox_msg(struct hinic_hwdev *hwdev, u16 pf_idx, u16 vf_id,
++static int __ppf_process_mbox_msg(struct hinic_hwdev *hwdev, u16 pf_idx, u16 vf_id,
+ 			   enum hinic_mod_type mod, u8 cmd, void *buf_in,
+ 			   u16 in_size, void *buf_out, u16 *out_size)
+ {
+@@ -617,7 +617,7 @@ int hinic_ppf_process_mbox_msg(struct hinic_hwdev *hwdev, u16 pf_idx, u16 vf_id,
+ 	return err;
+ }
+ 
+-int comm_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
++static int comm_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 			  void *buf_in, u16 in_size, void *buf_out,
+ 			  u16 *out_size)
+ {
+@@ -626,7 +626,7 @@ int comm_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 					  out_size);
+ }
+ 
+-void comm_ppf_to_pf_handler(void *handle, u8 cmd,
++static void comm_ppf_to_pf_handler(void *handle, u8 cmd,
+ 			    void *buf_in, u16 in_size,
+ 			    void *buf_out, u16 *out_size)
+ {
+@@ -635,7 +635,7 @@ void comm_ppf_to_pf_handler(void *handle, u8 cmd,
+ 	sdk_err(hwdev->dev_hdl, "pf receive ppf common mbox msg, don't supported for now\n");
+ }
+ 
+-int hilink_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
++static int hilink_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 			    void *buf_in, u16 in_size, void *buf_out,
+ 			    u16 *out_size)
+ {
+@@ -644,7 +644,7 @@ int hilink_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 					  in_size, buf_out, out_size);
+ }
+ 
+-int hinic_nic_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
++static int hinic_nic_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 			       void *buf_in, u16 in_size, void *buf_out,
+ 			       u16 *out_size)
+ {
+@@ -653,7 +653,7 @@ int hinic_nic_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 					  buf_out, out_size);
+ }
+ 
+-void hinic_nic_ppf_to_pf_handler(void *handle, u8 cmd,
++static void hinic_nic_ppf_to_pf_handler(void *handle, u8 cmd,
+ 				 void *buf_in, u16 in_size,
+ 				 void *buf_out, u16 *out_size)
+ {
+@@ -662,7 +662,7 @@ void hinic_nic_ppf_to_pf_handler(void *handle, u8 cmd,
+ 	sdk_err(hwdev->dev_hdl, "ppf receive other pf l2nic mbox msg, don't supported for now\n");
+ }
+ 
+-int hinic_register_slave_ppf(struct hinic_hwdev *hwdev, bool registered)
++static int hinic_register_slave_ppf(struct hinic_hwdev *hwdev, bool registered)
+ {
+ 	struct register_slave_host host_info = {0};
+ 	u16 out_size = sizeof(host_info);
+@@ -723,7 +723,7 @@ static int get_host_id_by_func_id(struct hinic_hwdev *hwdev, u16 func_idx,
+ 	return -EFAULT;
+ }
+ 
+-int set_slave_func_nic_state(struct hinic_hwdev *hwdev, u16 func_idx, u8 en)
++static int set_slave_func_nic_state(struct hinic_hwdev *hwdev, u16 func_idx, u8 en)
+ {
+ 	struct hinic_slave_func_nic_state nic_state = {0};
+ 	u16 out_size = sizeof(nic_state);
+diff --git a/hinic/hinic_nic_cfg.c b/hinic/hinic_nic_cfg.c
+index f95f383..acbc556 100644
+--- a/hinic/hinic_nic_cfg.c
++++ b/hinic/hinic_nic_cfg.c
+@@ -528,7 +528,7 @@ int hinic_set_port_mtu(void *hwdev, u32 new_mtu)
+ 	return 0;
+ }
+ 
+-int hinic_hiovs_set_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
++static int hinic_hiovs_set_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
+ {
+ 	struct hinic_hwdev *nic_hwdev = (struct hinic_hwdev *)hwdev;
+ 	struct cmd_cpath_vlan cpath_vlan_info = {0};
+@@ -554,7 +554,7 @@ int hinic_hiovs_set_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
+ 	return 0;
+ }
+ 
+-int hinic_hiovs_del_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
++static int hinic_hiovs_del_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
+ {
+ 	struct hinic_hwdev *nic_hwdev = (struct hinic_hwdev *)hwdev;
+ 	struct cmd_cpath_vlan cpath_vlan_info = {0};
+@@ -2619,7 +2619,7 @@ static void hinic_get_vf_cos_msg_handler(struct hinic_nic_io *nic_io,
+ }
+ 
+ /* pf receive message from vf */
+-int nic_pf_mbox_handler(void *hwdev, u16 vf_id, u8 cmd, void *buf_in,
++static int nic_pf_mbox_handler(void *hwdev, u16 vf_id, u8 cmd, void *buf_in,
+ 			u16 in_size, void *buf_out, u16 *out_size)
+ {
+ 	u8 size = ARRAY_SIZE(nic_cmd_support_vf);
+diff --git a/hinic/hinic_nic_io.c b/hinic/hinic_nic_io.c
+index 1641b97..eaf2e52 100644
+--- a/hinic/hinic_nic_io.c
++++ b/hinic/hinic_nic_io.c
+@@ -359,7 +359,7 @@ void hinic_free_qps(void *dev)
+ }
+ EXPORT_SYMBOL(hinic_free_qps);
+ 
+-void hinic_qp_prepare_cmdq_header(struct hinic_qp_ctxt_header *qp_ctxt_hdr,
++static void hinic_qp_prepare_cmdq_header(struct hinic_qp_ctxt_header *qp_ctxt_hdr,
+ 				  enum hinic_qp_ctxt_type ctxt_type,
+ 				  u16 num_queues, u16 max_queues, u16 q_id)
+ {
+@@ -378,7 +378,7 @@ void hinic_qp_prepare_cmdq_header(struct hinic_qp_ctxt_header *qp_ctxt_hdr,
+ 	hinic_cpu_to_be32(qp_ctxt_hdr, sizeof(*qp_ctxt_hdr));
+ }
+ 
+-void hinic_sq_prepare_ctxt(struct hinic_sq *sq, u16 global_qpn,
++static void hinic_sq_prepare_ctxt(struct hinic_sq *sq, u16 global_qpn,
+ 			   struct hinic_sq_ctxt *sq_ctxt)
+ {
+ 	struct hinic_wq *wq = sq->wq;
+@@ -440,7 +440,7 @@ void hinic_sq_prepare_ctxt(struct hinic_sq *sq, u16 global_qpn,
+ 	hinic_cpu_to_be32(sq_ctxt, sizeof(*sq_ctxt));
+ }
+ 
+-void hinic_rq_prepare_ctxt(struct hinic_rq *rq, struct hinic_rq_ctxt *rq_ctxt)
++static void hinic_rq_prepare_ctxt(struct hinic_rq *rq, struct hinic_rq_ctxt *rq_ctxt)
+ {
+ 	struct hinic_wq *wq = rq->wq;
+ 	u64 wq_page_addr;
+diff --git a/hinic/hinic_nictool.c b/hinic/hinic_nictool.c
+index 92a3d25..1882a94 100644
+--- a/hinic/hinic_nictool.c
++++ b/hinic/hinic_nictool.c
+@@ -695,7 +695,7 @@ static int set_dcb_cfg(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	return 0;
+ }
+ 
+-int get_pfc_info(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int get_pfc_info(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		 u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	union _pfc pfc = {.data = 0};
+@@ -717,7 +717,7 @@ int get_pfc_info(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	return 0;
+ }
+ 
+-int set_pfc_control(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int set_pfc_control(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		    u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	u8 pfc_en = 0;
+@@ -749,7 +749,7 @@ exit:
+ 	return 0;
+ }
+ 
+-int set_ets(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int set_ets(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	    u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	struct _ets ets =  {0};
+@@ -824,7 +824,7 @@ exit:
+ 	return 0;
+ }
+ 
+-int get_support_up(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int get_support_up(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		   u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	u8 *up_num = buf_out;
+@@ -852,7 +852,7 @@ int get_support_up(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	return 0;
+ }
+ 
+-int get_support_tc(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int get_support_tc(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		   u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	u8 *tc_num = buf_out;
+@@ -872,7 +872,7 @@ int get_support_tc(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	return 0;
+ }
+ 
+-int get_ets_info(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int get_ets_info(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		 u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	struct _ets *ets = buf_out;
+@@ -890,7 +890,7 @@ int get_ets_info(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 	return 0;
+ }
+ 
+-int set_pfc_priority(struct hinic_nic_dev *nic_dev, void *buf_in,
++static int set_pfc_priority(struct hinic_nic_dev *nic_dev, void *buf_in,
+ 		     u32 in_size, void *buf_out, u32 *out_size)
+ {
+ 	u8 pfc_prority = 0;
+@@ -1414,10 +1414,6 @@ static int knl_free_mem(char *dev_name, struct msg_module *nt_msg)
+ 	return 0;
+ }
+ 
+-extern void hinic_get_card_func_info_by_card_name(const char *chip_name,
+-						  struct hinic_card_func_info
+-						  *card_func);
+-
+ static int get_card_func_info(char *dev_name, struct msg_module *nt_msg)
+ {
+ 	struct hinic_card_func_info card_func_info = {0};
+diff --git a/hinic/hinic_rx.c b/hinic/hinic_rx.c
+index 8f5db7f..a3e9a72 100644
+--- a/hinic/hinic_rx.c
++++ b/hinic/hinic_rx.c
+@@ -168,7 +168,7 @@ static int hinic_rx_fill_buffers(struct hinic_rxq *rxq)
+ 	return i;
+ }
+ 
+-void hinic_rx_free_buffers(struct hinic_rxq *rxq)
++static void hinic_rx_free_buffers(struct hinic_rxq *rxq)
+ {
+ 	u16 i;
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(rxq->netdev);
+@@ -510,7 +510,7 @@ static void hinic_copy_lp_data(struct hinic_nic_dev *nic_dev,
+ 	nic_dev->lb_test_rx_idx++;
+ }
+ 
+-int recv_one_pkt(struct hinic_rxq *rxq, struct hinic_rq_cqe *rx_cqe,
++static int recv_one_pkt(struct hinic_rxq *rxq, struct hinic_rq_cqe *rx_cqe,
+ 		 u32 pkt_len, u32 vlan_len, u32 status)
+ {
+ 	struct sk_buff *skb;
+@@ -557,7 +557,7 @@ int recv_one_pkt(struct hinic_rxq *rxq, struct hinic_rq_cqe *rx_cqe,
+ 	return 0;
+ }
+ 
+-void rx_pass_super_cqe(struct hinic_rxq *rxq, u32 index, u32 pkt_num,
++static void rx_pass_super_cqe(struct hinic_rxq *rxq, u32 index, u32 pkt_num,
+ 		       struct hinic_rq_cqe *cqe)
+ {
+ 	u8 sge_num = 0;
+diff --git a/hinic/hinic_sml_counter.c b/hinic/hinic_sml_counter.c
+index 8c205e9..69601ad 100644
+--- a/hinic/hinic_sml_counter.c
++++ b/hinic/hinic_sml_counter.c
+@@ -19,6 +19,7 @@
+ #include "hinic_hw.h"
+ #include "hinic_hwdev.h"
+ #include "hinic_sml_counter.h"
++#include "hinic_dbg.h"
+ 
+ static void sml_ctr_htonl_n(u32 *node, u32 len)
+ {
+diff --git a/hinic/hinic_tx.c b/hinic/hinic_tx.c
+index 7eb85bf..802bfe2 100644
+--- a/hinic/hinic_tx.c
++++ b/hinic/hinic_tx.c
+@@ -910,7 +910,7 @@ int hinic_tx_poll(struct hinic_txq *txq, int budget)
+ 	return pkts;
+ }
+ 
+-int hinic_setup_tx_wqe(struct hinic_txq *txq)
++static int hinic_setup_tx_wqe(struct hinic_txq *txq)
+ {
+ 	struct net_device *netdev = txq->netdev;
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(netdev);
+@@ -1097,7 +1097,7 @@ static bool hinic_get_hw_handle_status(void *hwdev, u16 q_id)
+ 	return sw_pi == hw_ci;
+ }
+ 
+-int hinic_stop_sq(struct hinic_txq *txq)
++static int hinic_stop_sq(struct hinic_txq *txq)
+ {
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(txq->netdev);
+ 	unsigned long timeout;
+-- 
+2.49.0
+

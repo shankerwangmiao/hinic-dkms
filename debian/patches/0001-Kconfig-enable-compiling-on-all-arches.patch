@@ -1,0 +1,25 @@
+From f7800597649f7d42e8c8e7ecdcc9cd1ecf86a0f0 Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 5 Jun 2025 19:01:54 +0800
+Subject: [PATCH] Kconfig: enable compiling on all arches
+
+---
+ hinic/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hinic/Kconfig b/hinic/Kconfig
+index b47bd54..1dbe0a0 100644
+--- a/hinic/Kconfig
++++ b/hinic/Kconfig
+@@ -5,7 +5,7 @@
+ 
+ config HINIC
+ 	tristate "Huawei Intelligent PCIE Network Interface Card"
+-	depends on (PCI_MSI && (X86 || ARM64))
++	depends on (PCI_MSI)
+ 	select NET_DEVLINK
+ 	help
+ 	  This driver supports HiNIC PCIE Ethernet cards.
+-- 
+2.49.0
+

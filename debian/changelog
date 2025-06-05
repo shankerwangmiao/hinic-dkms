@@ -1,3 +1,9 @@
+hinic (0+git20250605+6.6.0-95.0.0-1) unstable; urgency=low
+
+  * Import changes from 6.6.0-95.0.0
+
+ -- Miao Wang <shankerwangmiao@gmail.com>  Thu, 05 Jun 2025 19:16:00 +0800
+
 hinic (0+git20230415+5.10.0-136.28.0-1) unstable; urgency=low
 
   * Import changes from 5.10.0-136.28.0 (openEuler-22.03-LTS-SP1)

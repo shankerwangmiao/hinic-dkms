@@ -1,0 +1,108 @@
+From 24d09b9ce0950450d7d317c5d87c286677985d0f Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 5 Jun 2025 19:07:44 +0800
+Subject: [PATCH] migrate for kAPI changes
+
+in commit fb6e30a72539 ("net: ethtool: pass a pointer to parameters to
+get/set_rxfh ethtool ops)
+---
+ hinic/hinic_ethtool.c | 31 ++++++++++++++++---------------
+ 1 file changed, 16 insertions(+), 15 deletions(-)
+
+diff --git a/hinic/hinic_ethtool.c b/hinic/hinic_ethtool.c
+index 5ab2158..95045cf 100644
+--- a/hinic/hinic_ethtool.c
++++ b/hinic/hinic_ethtool.c
+@@ -2294,7 +2294,7 @@ static u32 hinic_get_rxfh_key_size(struct net_device *netdev)
+ }
+ 
+ static int hinic_get_rxfh(struct net_device *netdev,
+-			  u32 *indir, u8 *key, u8 *hfunc)
++			  struct ethtool_rxfh_param *rxfh)
+ {
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(netdev);
+ 	int err = 0;
+@@ -2302,7 +2302,7 @@ static int hinic_get_rxfh(struct net_device *netdev,
+ 	if (!test_bit(HINIC_RSS_ENABLE, &nic_dev->flags))
+ 		return -EOPNOTSUPP;
+ 
+-	if (hfunc) {
++	if (rxfh->hfunc) {
+ 		u8 hash_engine_type = 0;
+ 
+ 		err = hinic_rss_get_hash_engine(nic_dev->hwdev,
+@@ -2311,25 +2311,26 @@ static int hinic_get_rxfh(struct net_device *netdev,
+ 		if (err)
+ 			return -EFAULT;
+ 
+-		*hfunc = hash_engine_type ? ETH_RSS_HASH_TOP : ETH_RSS_HASH_XOR;
++		rxfh->hfunc = hash_engine_type ? ETH_RSS_HASH_TOP : ETH_RSS_HASH_XOR;
+ 	}
+ 
+-	if (indir) {
++	if (rxfh->indir) {
+ 		err = hinic_rss_get_indir_tbl(nic_dev->hwdev,
+-					      nic_dev->rss_tmpl_idx, indir);
++					      nic_dev->rss_tmpl_idx, rxfh->indir);
+ 		if (err)
+ 			return -EFAULT;
+ 	}
+ 
+-	if (key)
++	if (rxfh->key)
+ 		err = hinic_rss_get_template_tbl(nic_dev->hwdev,
+-						 nic_dev->rss_tmpl_idx, key);
++						 nic_dev->rss_tmpl_idx, rxfh->key);
+ 
+ 	return err;
+ }
+ 
+-static int hinic_set_rxfh(struct net_device *netdev, const u32 *indir,
+-			  const u8 *key, const u8 hfunc)
++static int hinic_set_rxfh(struct net_device *netdev,
++			  struct ethtool_rxfh_param *rxfh,
++			  struct netlink_ext_ack *extack)
+ {
+ 	struct hinic_nic_dev *nic_dev = netdev_priv(netdev);
+ 	int err = 0;
+@@ -2340,20 +2341,20 @@ static int hinic_set_rxfh(struct net_device *netdev, const u32 *indir,
+ 		return -EOPNOTSUPP;
+ 	}
+ 
+-	if (test_bit(HINIC_DCB_ENABLE, &nic_dev->flags) && indir) {
++	if (test_bit(HINIC_DCB_ENABLE, &nic_dev->flags) && rxfh->indir) {
+ 		nicif_err(nic_dev, drv, netdev,
+ 			  "Not support to set indir when DCB is enabled\n");
+ 		return -EOPNOTSUPP;
+ 	}
+ 
+-	if (hfunc != ETH_RSS_HASH_NO_CHANGE) {
+-		if (hfunc != ETH_RSS_HASH_TOP && hfunc != ETH_RSS_HASH_XOR) {
++	if (rxfh->hfunc != ETH_RSS_HASH_NO_CHANGE) {
++		if (rxfh->hfunc != ETH_RSS_HASH_TOP && rxfh->hfunc != ETH_RSS_HASH_XOR) {
+ 			nicif_err(nic_dev, drv, netdev,
+ 				  "Not support to set hfunc type except TOP and XOR\n");
+ 			return -EOPNOTSUPP;
+ 		}
+ 
+-		nic_dev->rss_hash_engine = (hfunc == ETH_RSS_HASH_XOR) ?
++		nic_dev->rss_hash_engine = (rxfh->hfunc == ETH_RSS_HASH_XOR) ?
+ 			HINIC_RSS_HASH_ENGINE_TYPE_XOR :
+ 			HINIC_RSS_HASH_ENGINE_TYPE_TOEP;
+ 		err = hinic_rss_set_hash_engine
+@@ -2364,10 +2365,10 @@ static int hinic_set_rxfh(struct net_device *netdev, const u32 *indir,
+ 
+ 		nicif_info(nic_dev, drv, netdev,
+ 			   "Change hfunc to RSS_HASH_%s success\n",
+-			   (hfunc == ETH_RSS_HASH_XOR) ? "XOR" : "TOP");
++			   (rxfh->hfunc == ETH_RSS_HASH_XOR) ? "XOR" : "TOP");
+ 	}
+ 
+-	err = __set_rss_rxfh(netdev, indir, key);
++	err = __set_rss_rxfh(netdev, rxfh->indir, rxfh->key);
+ 
+ 	return err;
+ }
+-- 
+2.49.0
+

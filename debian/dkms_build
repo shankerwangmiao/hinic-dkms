@@ -1,4 +1,4 @@
 #!/bin/bash
 ksrc=$1
 shift
-exec make -C "$ksrc" M="$PWD" "$@"
+exec make -C "$ksrc" M="$PWD" "$@" CONFIG_HINIC=m

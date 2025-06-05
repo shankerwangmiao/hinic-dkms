@@ -1,0 +1,40 @@
+From 0a81ac5683a8efd51bcd2c96851cfe3eac1eb755 Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 5 Jun 2025 19:10:58 +0800
+Subject: [PATCH] use skb_frag_off* functions instead of directly access to the
+ members
+
+---
+ hinic/hinic_rx.c | 2 +-
+ hinic/hinic_tx.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hinic/hinic_rx.c b/hinic/hinic_rx.c
+index a3e9a72..cf291c7 100644
+--- a/hinic/hinic_rx.c
++++ b/hinic/hinic_rx.c
+@@ -429,7 +429,7 @@ static void hinic_pull_tail(struct sk_buff *skb)
+ 
+ 	/* update all of the pointers */
+ 	skb_frag_size_sub(frag, HINIC_RX_HDR_SIZE);
+-	frag->bv_offset += HINIC_RX_HDR_SIZE;
++	skb_frag_off_add(frag, HINIC_RX_HDR_SIZE);
+ 	skb->data_len -= HINIC_RX_HDR_SIZE;
+ 	skb->tail += HINIC_RX_HDR_SIZE;
+ }
+diff --git a/hinic/hinic_tx.c b/hinic/hinic_tx.c
+index 802bfe2..cd4cce0 100644
+--- a/hinic/hinic_tx.c
++++ b/hinic/hinic_tx.c
+@@ -157,7 +157,7 @@ static int tx_map_skb(struct hinic_nic_dev *nic_dev, struct sk_buff *skb,
+ 			nsize = skb_frag_size(frag);
+ 
+ 			vaddr = kmap_local_page(skb_frag_page(frag));
+-			memcpy(cpy_buff, vaddr + frag->bv_offset, nsize);
++			memcpy(cpy_buff, vaddr + skb_frag_off(frag), nsize);
+ 			kunmap_local(vaddr);
+ 			cpy_buff += nsize;
+ 		}
+-- 
+2.49.0
+

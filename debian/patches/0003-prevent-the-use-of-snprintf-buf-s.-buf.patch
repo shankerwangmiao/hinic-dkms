@@ -1,0 +1,103 @@
+From 55f94b4e9a6196df3169bcb8174df4b160429a0a Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 5 Jun 2025 19:06:26 +0800
+Subject: [PATCH] prevent the use of snprintf(buf, , "%s...", buf, ...)
+
+which is UB
+---
+ hinic/hinic_ethtool.c |  9 ++++++---
+ hinic/hinic_hwdev.c   | 25 +++++++++++++++----------
+ 2 files changed, 21 insertions(+), 13 deletions(-)
+
+diff --git a/hinic/hinic_ethtool.c b/hinic/hinic_ethtool.c
+index 9810f54..5ab2158 100644
+--- a/hinic/hinic_ethtool.c
++++ b/hinic/hinic_ethtool.c
+@@ -707,6 +707,7 @@ static int hinic_set_settings_to_hw(struct hinic_nic_dev *nic_dev,
+ 	enum nic_speed_level speed_level = 0;
+ 	char set_link_str[SET_LINK_STR_MAX_LEN] = {0};
+ 	int err = 0;
++	int str_pos = 0;
+ 
+ 	err = snprintf(set_link_str, sizeof(set_link_str), "%s",
+ 		       (set_settings & HILINK_LINK_SET_AUTONEG) ?
+@@ -716,12 +717,14 @@ static int hinic_set_settings_to_hw(struct hinic_nic_dev *nic_dev,
+ 			  "Failed to snprintf link state, function return(%d) and dest_len(%d)\n",
+ 			  err, SET_LINK_STR_MAX_LEN);
+ 		return -EFAULT;
++	} else {
++		str_pos = err;
+ 	}
+ 	if (set_settings & HILINK_LINK_SET_SPEED) {
+ 		speed_level = hinic_ethtool_to_hw_speed_level(speed);
+-		err = snprintf(set_link_str, sizeof(set_link_str),
+-			       "%sspeed %d ", set_link_str, speed);
+-		if (err <= 0 || err >= SET_LINK_STR_MAX_LEN) {
++		err = snprintf(set_link_str + str_pos, sizeof(set_link_str) - str_pos,
++			       "speed %d ", speed);
++		if (err <= 0 || err >= SET_LINK_STR_MAX_LEN - str_pos) {
+ 			nicif_err(nic_dev, drv, netdev,
+ 				  "Failed to snprintf link speed, function return(%d) and dest_len(%d)\n",
+ 				  err, SET_LINK_STR_MAX_LEN);
+diff --git a/hinic/hinic_hwdev.c b/hinic/hinic_hwdev.c
+index 50d5c8f..c0f59cf 100644
+--- a/hinic/hinic_hwdev.c
++++ b/hinic/hinic_hwdev.c
+@@ -3910,6 +3910,7 @@ static void __print_cable_info(struct hinic_hwdev *hwdev,
+ 	char *port_type = "Unknown port type";
+ 	int i;
+ 	int err = 0;
++	int str_pos = 0;
+ 
+ 	if (info->cable_absent) {
+ 		sdk_info(hwdev->dev_hdl, "Cable unpresent\n");
+@@ -3946,32 +3947,36 @@ static void __print_cable_info(struct hinic_hwdev *hwdev,
+ 			"Failed snprintf cable vendor info, function return(%d) and dest_len(%d)\n",
+ 			err, CAP_INFO_MAC_LEN);
+ 		return;
++	} else {
++		str_pos = err;
+ 	}
+ 
+ 	if (info->port_type == LINK_PORT_FIBRE ||
+ 	    info->port_type == LINK_PORT_AOC) {
+-		err = snprintf(tmp_str, sizeof(tmp_str),
+-			       "%s, %s, Temperature: %u", tmp_str,
++		err = snprintf(tmp_str + str_pos, sizeof(tmp_str) - str_pos,
++			       ", %s, Temperature: %u",
+ 			       info->sfp_type ? "SFP" : "QSFP",
+ 			       info->cable_temp);
+-		if (err <= 0 || err >= CAP_INFO_MAC_LEN) {
++		if (err <= 0 || err >= CAP_INFO_MAC_LEN - str_pos) {
+ 			sdk_err(hwdev->dev_hdl,
+ 				"Failed snprintf cable Temp, function return(%d) and dest_len(%d)\n",
+ 				err, CAP_INFO_MAC_LEN);
+ 			return;
++		} else {
++			str_pos += err;
+ 		}
+ 
+ 		if (info->sfp_type) {
+-			err = snprintf(tmp_str, sizeof(tmp_str),
+-				       "%s, rx power: %uuW, tx power: %uuW",
+-				       tmp_str, info->power[0], info->power[1]);
++			err = snprintf(tmp_str + str_pos, sizeof(tmp_str) - str_pos,
++				       ", rx power: %uuW, tx power: %uuW",
++				       info->power[0], info->power[1]);
+ 		} else {
+-			err = snprintf(tmp_str, sizeof(tmp_str),
+-				       "%s, rx power: %uuw %uuW %uuW %uuW",
+-				       tmp_str, info->power[0], info->power[1],
++			err = snprintf(tmp_str + str_pos, sizeof(tmp_str) - str_pos,
++				       ", rx power: %uuw %uuW %uuW %uuW",
++				       info->power[0], info->power[1],
+ 				       info->power[2], info->power[3]);
+ 		}
+-		if (err <= 0 || err >= CAP_INFO_MAC_LEN) {
++		if (err <= 0 || err >= CAP_INFO_MAC_LEN - str_pos) {
+ 			sdk_err(hwdev->dev_hdl,
+ 				"Failed snprintf power info, function return(%d) and dest_len(%d)\n",
+ 				err, CAP_INFO_MAC_LEN);
+-- 
+2.49.0
+

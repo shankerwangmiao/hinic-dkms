@@ -11,10 +11,6 @@ pkgname = $(MOD_NAME)-dkms
 %:
 	dh $@ --with dkms
 
-override_dh_build:
-	echo "CONFIG_HINIC = m" > hinic/Kbuild
-	cat hinic/Makefile >> hinic/Kbuild
-
 override_dh_install:
 	sed -e "s/DEB_VERSION_UPSTREAM/$(DEB_VERSION_UPSTREAM)/g" debian/install.in > debian/install
 	dh_install
