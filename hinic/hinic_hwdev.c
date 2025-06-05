@@ -610,7 +610,7 @@ struct hinic_mgmt_status_log {
 	const char *log;
 };
 
-struct hinic_mgmt_status_log mgmt_status_log[] = {
+static struct hinic_mgmt_status_log mgmt_status_log[] = {
 	{HINIC_MGMT_STATUS_ERR_PARAM, "Invalid parameter"},
 	{HINIC_MGMT_STATUS_ERR_FAILED, "Operation failed"},
 	{HINIC_MGMT_STATUS_ERR_PORT, "Invalid port"},
@@ -2700,8 +2700,8 @@ int hinic_func_tmr_bitmap_set(void *hwdev, bool en)
 }
 EXPORT_SYMBOL(hinic_func_tmr_bitmap_set);
 
-int ppf_ht_gpa_set(struct hinic_hwdev *hwdev, struct hinic_page_addr *pg0,
-		   struct hinic_page_addr *pg1)
+static int ppf_ht_gpa_set(struct hinic_hwdev *hwdev, struct hinic_page_addr *pg0,
+			  struct hinic_page_addr *pg1)
 {
 	struct comm_info_ht_gpa_set ht_gpa_set = {0};
 	u16 out_size = sizeof(ht_gpa_set);
@@ -3355,9 +3355,9 @@ static void fault_report_show(struct hinic_hwdev *hwdev,
 
 	memset(type_str, 0, FAULT_SHOW_STR_LEN + 1);
 	if (event->type < FAULT_TYPE_MAX)
-		strncpy(type_str, fault_type[event->type], FAULT_SHOW_STR_LEN);
+		strscpy(type_str, fault_type[event->type], FAULT_SHOW_STR_LEN);
 	else
-		strncpy(type_str, "Unknown", FAULT_SHOW_STR_LEN);
+		strscpy(type_str, "Unknown", FAULT_SHOW_STR_LEN);
 
 	sdk_err(hwdev->dev_hdl, "Fault type: %d [%s]\n", event->type, type_str);
 	sdk_err(hwdev->dev_hdl, "Fault val[0]: 0x%08x, val[1]: 0x%08x, val[2]: 0x%08x, val[3]: 0x%08x\n",
@@ -3371,10 +3371,10 @@ static void fault_report_show(struct hinic_hwdev *hwdev,
 		memset(level_str, 0, FAULT_SHOW_STR_LEN + 1);
 		level = event->event.chip.err_level;
 		if (level < FAULT_LEVEL_MAX)
-			strncpy(level_str, fault_level[level],
+			strscpy(level_str, fault_level[level],
 				FAULT_SHOW_STR_LEN);
 		else
-			strncpy(level_str, "Unknown", FAULT_SHOW_STR_LEN);
+			strscpy(level_str, "Unknown", FAULT_SHOW_STR_LEN);
 
 		if (level == FAULT_LEVEL_SERIOUS_FLR) {
 			sdk_err(hwdev->dev_hdl, "err_level: %d [%s], flr func_id: %d\n",
@@ -3716,9 +3716,6 @@ static void port_sfp_info_event(struct hinic_hwdev *hwdev, void *buf_in,
 		return;
 	}
 
-	if (!chip_node->rt_cmd)
-		return;
-
 	rt_cmd = &chip_node->rt_cmd[sfp_info->port_id];
 	mutex_lock(&chip_node->sfp_mutex);
 	memcpy(&rt_cmd->sfp_info, sfp_info, sizeof(rt_cmd->sfp_info));
@@ -3744,9 +3741,6 @@ static void port_sfp_abs_event(struct hinic_hwdev *hwdev, void *buf_in,
 			sfp_abs->port_id, HINIC_MAX_PORT_ID - 1);
 		return;
 	}
-
-	if (!chip_node->rt_cmd)
-		return;
 
 	rt_cmd = &chip_node->rt_cmd[sfp_abs->port_id];
 	mutex_lock(&chip_node->sfp_mutex);
@@ -3810,10 +3804,8 @@ static void hinic_pcie_dfx_event_handler(struct hinic_hwdev *hwdev,
 	}
 
 	dfx_info = kzalloc(sizeof(*dfx_info), GFP_KERNEL);
-	if (!dfx_info) {
-		sdk_err(hwdev->dev_hdl, "Malloc dfx_info memory failed\n");
+	if (!dfx_info)
 		return;
-	}
 
 	((struct hinic_pcie_dfx_ntc *)buf_out)->status = 0;
 	*out_size = sizeof(*notice_info);
@@ -3903,9 +3895,9 @@ static void hinic_mctp_get_host_info_event_handler(struct hinic_hwdev *hwdev,
 	mctp_out->actual_len = host_info->data_len;
 }
 
-char *__hw_to_char_fec[HILINK_FEC_MAX_TYPE] = {"RS-FEC", "BASE-FEC", "NO-FEC"};
+static char *__hw_to_char_fec[HILINK_FEC_MAX_TYPE] = {"RS-FEC", "BASE-FEC", "NO-FEC"};
 
-char *__hw_to_char_port_type[LINK_PORT_MAX_TYPE] = {
+static char *__hw_to_char_port_type[LINK_PORT_MAX_TYPE] = {
 	"Unknown", "Fibre", "Electric", "Direct Attach Copper", "AOC",
 	"Back plane", "BaseT"
 };
@@ -4067,9 +4059,9 @@ static char *hilink_info_report_type[HILINK_EVENT_MAX_TYPE] = {
 	"", "link up", "link down", "cable plugged"
 };
 
-void print_hilink_info(struct hinic_hwdev *hwdev,
-		       enum hilink_info_print_event type,
-		       struct hinic_link_info *info)
+static void print_hilink_info(struct hinic_hwdev *hwdev,
+			      enum hilink_info_print_event type,
+			      struct hinic_link_info *info)
 {
 	__print_cable_info(hwdev, info);
 
@@ -4318,37 +4310,37 @@ static void pf_hilink_event_handler(void *hwdev, void *pri_handle, u8 cmd,
 }
 
 /* pf fault report event */
-void pf_fault_event_handler(void *hwdev,
-			    void *buf_in, u16 in_size,
-		   void *buf_out, u16 *out_size)
+static void pf_fault_event_handler(void *hwdev,
+				   void *buf_in, u16 in_size,
+				   void *buf_out, u16 *out_size)
 {
 	_event_handler(hwdev, HINIC_EVENT_MGMT_FAULT, buf_in,
 		       in_size, buf_out, out_size);
 }
 
-void mgmt_watchdog_event_handler(void *hwdev, void *buf_in, u16 in_size,
-				 void *buf_out, u16 *out_size)
+static void mgmt_watchdog_event_handler(void *hwdev, void *buf_in, u16 in_size,
+					void *buf_out, u16 *out_size)
 {
 	_event_handler(hwdev, HINIC_EVENT_MGMT_WATCHDOG, buf_in,
 		       in_size, buf_out, out_size);
 }
 
-void mgmt_fmw_act_event_handler(void *hwdev, void *buf_in, u16 in_size,
-				void *buf_out, u16 *out_size)
+static void mgmt_fmw_act_event_handler(void *hwdev, void *buf_in, u16 in_size,
+				       void *buf_out, u16 *out_size)
 {
 	_event_handler(hwdev, HINIC_EVENT_MGMT_FMW_ACT_NTC, buf_in,
 		       in_size, buf_out, out_size);
 }
 
-void mgmt_pcie_dfx_event_handler(void *hwdev, void *buf_in, u16 in_size,
-				 void *buf_out, u16 *out_size)
+static void mgmt_pcie_dfx_event_handler(void *hwdev, void *buf_in, u16 in_size,
+					void *buf_out, u16 *out_size)
 {
 	_event_handler(hwdev, HINIC_EVENT_MGMT_PCIE_DFX, buf_in,
 		       in_size, buf_out, out_size);
 }
 
-void mgmt_get_mctp_event_handler(void *hwdev, void *buf_in, u16 in_size,
-				 void *buf_out, u16 *out_size)
+static void mgmt_get_mctp_event_handler(void *hwdev, void *buf_in, u16 in_size,
+					void *buf_out, u16 *out_size)
 {
 	_event_handler(hwdev, HINIC_EVENT_MCTP_HOST_INFO, buf_in,
 		       in_size, buf_out, out_size);

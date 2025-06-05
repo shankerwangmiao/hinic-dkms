@@ -891,10 +891,8 @@ int hinic_multi_host_mgmt_init(struct hinic_hwdev *hwdev)
 		return 0;
 
 	hwdev->mhost_mgmt = kzalloc(sizeof(*hwdev->mhost_mgmt), GFP_KERNEL);
-	if (!hwdev->mhost_mgmt) {
-		sdk_err(hwdev->dev_hdl, "Failed to alloc multi-host mgmt memory\n");
+	if (!hwdev->mhost_mgmt)
 		return -ENOMEM;
-	}
 
 	hwdev->mhost_mgmt->mhost_ppf_idx = get_master_host_ppf_idx(hwdev);
 	hwdev->mhost_mgmt->shost_ppf_idx = 0;

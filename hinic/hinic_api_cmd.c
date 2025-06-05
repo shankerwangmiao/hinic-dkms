@@ -975,10 +975,8 @@ static int api_chain_init(struct hinic_api_cmd_chain *chain,
 	}
 
 	chain->cell_ctxt = kzalloc(cell_ctxt_size, GFP_KERNEL);
-	if (!chain->cell_ctxt) {
-		sdk_err(dev, "Failed to allocate cell contexts for a chain\n");
+	if (!chain->cell_ctxt)
 		return -ENOMEM;
-	}
 
 	chain->wb_status = dma_alloc_coherent(dev, sizeof(*chain->wb_status),
 					      &chain->wb_status_paddr,

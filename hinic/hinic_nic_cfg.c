@@ -358,7 +358,7 @@ int hinic_del_mac(void *hwdev, const u8 *mac_addr, u16 vlan_id, u16 func_id)
 }
 EXPORT_SYMBOL(hinic_del_mac);
 
-int hinic_update_mac(void *hwdev, u8 *old_mac, u8 *new_mac, u16 vlan_id,
+int hinic_update_mac(void *hwdev, const u8 *old_mac, u8 *new_mac, u16 vlan_id,
 		     u16 func_id)
 {
 	struct hinic_hwdev *nic_hwdev = (struct hinic_hwdev *)hwdev;
@@ -785,7 +785,7 @@ int hinic_set_vlan_fliter(void *hwdev, u32 vlan_filter_ctrl)
 		err = HINIC_MGMT_CMD_UNSUPPORTED;
 	} else if (err || !out_size || vlan_filter.status) {
 		nic_err(nic_hwdev->dev_hdl,
-			"Failed to set vlan fliter, err: %d, status: 0x%x, out size: 0x%x\n",
+			"Failed to set vlan filter, err: %d, status: 0x%x, out size: 0x%x\n",
 			err, vlan_filter.status, out_size);
 		err = -EINVAL;
 	}

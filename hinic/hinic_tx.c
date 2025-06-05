@@ -61,7 +61,7 @@ void hinic_txq_get_stats(struct hinic_txq *txq,
 
 	u64_stats_update_begin(&stats->syncp);
 	do {
-		start = u64_stats_fetch_begin_irq(&txq_stats->syncp);
+		start = u64_stats_fetch_begin(&txq_stats->syncp);
 		stats->bytes = txq_stats->bytes;
 		stats->packets = txq_stats->packets;
 		stats->busy = txq_stats->busy;
@@ -69,7 +69,7 @@ void hinic_txq_get_stats(struct hinic_txq *txq,
 		stats->dropped = txq_stats->dropped;
 		stats->big_frags_pkts = txq_stats->big_frags_pkts;
 		stats->big_udp_pkts = txq_stats->big_udp_pkts;
-	} while (u64_stats_fetch_retry_irq(&txq_stats->syncp, start));
+	} while (u64_stats_fetch_retry(&txq_stats->syncp, start));
 	u64_stats_update_end(&stats->syncp);
 }
 
@@ -156,9 +156,9 @@ static int tx_map_skb(struct hinic_nic_dev *nic_dev, struct sk_buff *skb,
 			frag = &skb_shinfo(skb)->frags[i - 1];
 			nsize = skb_frag_size(frag);
 
-			vaddr = kmap_atomic(skb_frag_page(frag));
+			vaddr = kmap_local_page(skb_frag_page(frag));
 			memcpy(cpy_buff, vaddr + frag->bv_offset, nsize);
-			kunmap_atomic(vaddr);
+			kunmap_local(vaddr);
 			cpy_buff += nsize;
 		}
 	}
@@ -958,8 +958,6 @@ int hinic_setup_all_tx_resources(struct net_device *netdev)
 
 		txq->tx_info = kzalloc(tx_info_sz, GFP_KERNEL);
 		if (!txq->tx_info) {
-			nicif_err(nic_dev, drv, netdev, "Failed to allocate Tx:%d info\n",
-				  q_id);
 			err = -ENOMEM;
 			goto init_txq_err;
 		}

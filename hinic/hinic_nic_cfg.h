@@ -432,7 +432,7 @@ int hinic_set_mac(void *hwdev, const u8 *mac_addr, u16 vlan_id, u16 func_id);
 
 int hinic_del_mac(void *hwdev, const u8 *mac_addr, u16 vlan_id, u16 func_id);
 
-int hinic_update_mac(void *hwdev, u8 *old_mac, u8 *new_mac,
+int hinic_update_mac(void *hwdev, const u8 *old_mac, u8 *new_mac,
 		     u16 vlan_id, u16 func_id);
 int hinic_update_mac_vlan(void *hwdev, u16 old_vlan, u16 new_vlan, int vf_id);
 /* Obtaining the permanent mac */
