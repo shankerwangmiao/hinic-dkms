@@ -536,7 +536,7 @@ static bool aeq_irq_handler(struct hinic_eq *eq)
 
 		event = EQ_ELEM_DESC_GET(aeqe_desc, TYPE);
 		if (EQ_ELEM_DESC_GET(aeqe_desc, SRC)) {
-			ucode_event = event;
+			ucode_event = (enum hinic_ucode_event_type)event;
 			/* SW event uses only the first 8B */
 			sw_event = ucode_event >= HINIC_NIC_FATAL_ERROR_MAX ?
 				   HINIC_STATEFULL_EVENT :

@@ -375,7 +375,7 @@ void hinic_rxq_get_stats(struct hinic_rxq *rxq,
 
 	u64_stats_update_begin(&stats->syncp);
 	do {
-		start = u64_stats_fetch_begin_irq(&rxq_stats->syncp);
+		start = u64_stats_fetch_begin(&rxq_stats->syncp);
 		stats->bytes = rxq_stats->bytes;
 		stats->packets = rxq_stats->packets;
 		stats->errors = rxq_stats->csum_errors +
@@ -384,7 +384,7 @@ void hinic_rxq_get_stats(struct hinic_rxq *rxq,
 		stats->other_errors = rxq_stats->other_errors;
 		stats->dropped = rxq_stats->dropped;
 		stats->rx_buf_empty = rxq_stats->rx_buf_empty;
-	} while (u64_stats_fetch_retry_irq(&rxq_stats->syncp, start));
+	} while (u64_stats_fetch_retry(&rxq_stats->syncp, start));
 	u64_stats_update_end(&stats->syncp);
 }
 
@@ -845,10 +845,8 @@ int hinic_alloc_rxqs(struct net_device *netdev)
 	}
 
 	nic_dev->rxqs = kzalloc(rxq_size, GFP_KERNEL);
-	if (!nic_dev->rxqs) {
-		nic_err(&pdev->dev, "Failed to allocate rxqs\n");
+	if (!nic_dev->rxqs)
 		return -ENOMEM;
-	}
 
 	for (q_id = 0; q_id < num_rxqs; q_id++) {
 		rxq = &nic_dev->rxqs[q_id];
@@ -1047,10 +1045,8 @@ static int hinic_rss_init(struct hinic_nic_dev *nic_dev)
 	}
 
 	indir_tbl = kzalloc(sizeof(u32) * HINIC_RSS_INDIR_SIZE, GFP_KERNEL);
-	if (!indir_tbl) {
-		nicif_err(nic_dev, drv, netdev, "Failed to allocate rss init indir_tbl\n");
+	if (!indir_tbl)
 		return -ENOMEM;
-	}
 
 	if (nic_dev->rss_indir_user)
 		memcpy(indir_tbl, nic_dev->rss_indir_user,

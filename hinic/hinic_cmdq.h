@@ -187,7 +187,7 @@ struct hinic_cmdq {
 struct hinic_cmdqs {
 	struct hinic_hwdev		*hwdev;
 
-	struct pci_pool			*cmd_buf_pool;
+	struct dma_pool			*cmd_buf_pool;
 
 	struct hinic_wq			*saved_wqs;
 

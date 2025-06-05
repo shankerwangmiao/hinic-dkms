@@ -195,7 +195,6 @@ static int alloc_wq_pages(void *dev_hdl, struct hinic_wq *wq)
 	wq->mem_align = kcalloc(wq->num_q_pages, sizeof(*wq->mem_align),
 				GFP_KERNEL);
 	if (!wq->mem_align) {
-		sdk_err(dev_hdl, "Failed to allocate mem_align\n");
 		free_wqes_shadow(wq);
 		return -ENOMEM;
 	}

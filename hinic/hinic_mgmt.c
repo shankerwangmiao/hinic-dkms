@@ -1193,15 +1193,12 @@ static void recv_mgmt_msg_handler(struct hinic_msg_pf_to_mgmt *pf_to_mgmt,
 	}
 
 	mgmt_work = kzalloc(sizeof(*mgmt_work), GFP_KERNEL);
-	if (!mgmt_work) {
-		sdk_err(pf_to_mgmt->hwdev->dev_hdl, "Allocate mgmt work memory failed\n");
+	if (!mgmt_work)
 		return;
-	}
 
 	if (recv_msg->msg_len) {
 		mgmt_work->msg = kzalloc(recv_msg->msg_len, GFP_KERNEL);
 		if (!mgmt_work->msg) {
-			sdk_err(pf_to_mgmt->hwdev->dev_hdl, "Allocate mgmt msg memory failed\n");
 			kfree(mgmt_work);
 			return;
 		}

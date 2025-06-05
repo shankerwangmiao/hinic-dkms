@@ -262,7 +262,7 @@ struct hinic_cmd_buf *hinic_alloc_cmd_buf(void *hwdev)
 	if (!cmd_buf)
 		return NULL;
 
-	cmd_buf->buf = pci_pool_alloc(cmdqs->cmd_buf_pool, GFP_ATOMIC,
+	cmd_buf->buf = dma_pool_alloc(cmdqs->cmd_buf_pool, GFP_ATOMIC,
 				      &cmd_buf->dma_addr);
 	if (!cmd_buf->buf) {
 		sdk_err(dev, "Failed to allocate cmdq cmd buf from the pool\n");
@@ -288,7 +288,7 @@ void hinic_free_cmd_buf(void *hwdev, struct hinic_cmd_buf *cmd_buf)
 
 	cmdqs = ((struct hinic_hwdev *)hwdev)->cmdqs;
 
-	pci_pool_free(cmdqs->cmd_buf_pool, cmd_buf->buf, cmd_buf->dma_addr);
+	dma_pool_free(cmdqs->cmd_buf_pool, cmd_buf->buf, cmd_buf->dma_addr);
 	kfree(cmd_buf);
 }
 EXPORT_SYMBOL(hinic_free_cmd_buf);

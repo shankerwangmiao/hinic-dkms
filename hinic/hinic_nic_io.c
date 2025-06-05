@@ -145,10 +145,8 @@ static int init_rq(struct hinic_rq *rq, void *dev_hdl, struct hinic_wq *wq,
 
 	rq->pi_virt_addr = dma_alloc_coherent(dev_hdl, PAGE_SIZE,
 					      &rq->pi_dma_addr, GFP_KERNEL);
-	if (!rq->pi_virt_addr) {
-		nic_err(dev_hdl, "Failed to allocate rq pi virtual addr\n");
+	if (!rq->pi_virt_addr)
 		return -ENOMEM;
-	}
 
 	return 0;
 }

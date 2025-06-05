@@ -397,10 +397,8 @@ static int hinic_setup_num_qps(struct hinic_nic_dev *nic_dev)
 		return -EINVAL;
 	}
 	nic_dev->qps_irq_info = kzalloc(irq_size, GFP_KERNEL);
-	if (!nic_dev->qps_irq_info) {
-		nicif_err(nic_dev, drv, netdev, "Failed to alloc qps_irq_info\n");
+	if (!nic_dev->qps_irq_info)
 		return -ENOMEM;
-	}
 
 	err = hinic_alloc_irqs(nic_dev->hwdev, SERVICE_T_NIC, nic_dev->num_qps,
 			       nic_dev->qps_irq_info, &resp_irq_num);
@@ -482,7 +480,7 @@ static void qp_add_napi(struct hinic_irq *irq_cfg)
 {
 	struct hinic_nic_dev *nic_dev = netdev_priv(irq_cfg->netdev);
 
-	netif_napi_add(nic_dev->netdev, &irq_cfg->napi,
+	netif_napi_add_tx_weight(nic_dev->netdev, &irq_cfg->napi,
 		       hinic_poll, nic_dev->poll_weight);
 	napi_enable(&irq_cfg->napi);
 }
@@ -782,10 +780,8 @@ static int hinic_qps_irq_init(struct hinic_nic_dev *nic_dev)
 
 	nic_dev->irq_cfg = kcalloc(nic_dev->num_qps, sizeof(*nic_dev->irq_cfg),
 				   GFP_KERNEL);
-	if (!nic_dev->irq_cfg) {
-		nic_err(&pdev->dev, "Failed to alloc irq cfg\n");
+	if (!nic_dev->irq_cfg)
 		return -ENOMEM;
-	}
 
 	for (q_id = 0; q_id < nic_dev->num_qps; q_id++) {
 		qp_irq_info = &nic_dev->qps_irq_info[q_id];
@@ -1308,7 +1304,7 @@ static int hinic_set_mac_addr(struct net_device *netdev, void *addr)
 		return err == HINIC_PF_SET_VF_ALREADY ? -EPERM : err;
 	}
 
-	memcpy(netdev->dev_addr, saddr->sa_data, ETH_ALEN);
+	eth_hw_addr_set(netdev, saddr->sa_data);
 
 	nicif_info(nic_dev, drv, netdev, "Set new mac address %pM\n",
 		   saddr->sa_data);
@@ -2213,6 +2209,7 @@ static void hinic_try_to_enable_rss(struct hinic_nic_dev *nic_dev)
 static int hinic_sw_init(struct hinic_nic_dev *adapter)
 {
 	struct net_device *netdev = adapter->netdev;
+	u8 mac[ETH_ALEN];
 	u16 func_id;
 	int err = 0;
 
@@ -2237,11 +2234,12 @@ static int hinic_sw_init(struct hinic_nic_dev *adapter)
 
 	hinic_try_to_enable_rss(adapter);
 
-	err = hinic_get_default_mac(adapter->hwdev, netdev->dev_addr);
+	err = hinic_get_default_mac(adapter->hwdev, mac);
 	if (err) {
 		nic_err(&adapter->pdev->dev, "Failed to get MAC address\n");
 		goto get_mac_err;
 	}
+	eth_hw_addr_set(netdev, mac);
 
 	if (!is_valid_ether_addr(netdev->dev_addr)) {
 		if (!HINIC_FUNC_IS_VF(adapter->hwdev)) {
@@ -2428,10 +2426,8 @@ static int hinic_init_intr_coalesce(struct hinic_nic_dev *nic_dev)
 		return -EINVAL;
 	}
 	nic_dev->intr_coalesce = kzalloc(size, GFP_KERNEL);
-	if (!nic_dev->intr_coalesce) {
-		nic_err(&nic_dev->pdev->dev, "Failed to alloc intr coalesce\n");
+	if (!nic_dev->intr_coalesce)
 		return -ENOMEM;
-	}
 
 	init_intr_coal_param(nic_dev);
 
@@ -2752,7 +2748,6 @@ static int nic_probe(struct hinic_lld_dev *lld_dev, void **uld_dev,
 
 	nic_dev->vlan_bitmap = kzalloc(VLAN_BITMAP_SIZE(nic_dev), GFP_KERNEL);
 	if (!nic_dev->vlan_bitmap) {
-		nic_err(&pdev->dev, "Failed to allocate vlan bitmap\n");
 		err = -ENOMEM;
 		goto vlan_bitmap_err;
 	}

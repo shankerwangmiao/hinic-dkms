@@ -751,17 +751,15 @@ static void recv_mbox_handler(struct hinic_mbox_func_to_func *func_to_func,
 	}
 
 	rcv_mbox_temp = kzalloc(sizeof(*rcv_mbox_temp), GFP_KERNEL);
-	if (!rcv_mbox_temp) {
-		sdk_err(func_to_func->hwdev->dev_hdl, "Allocate receive mbox memory failed.\n");
+	if (!rcv_mbox_temp)
 		return;
-	}
+
 	memcpy(rcv_mbox_temp, recv_mbox, sizeof(*rcv_mbox_temp));
 
 	rcv_mbox_temp->mbox = kzalloc(MBOX_MAX_BUF_SZ, GFP_KERNEL);
-	if (!rcv_mbox_temp->mbox) {
-		sdk_err(func_to_func->hwdev->dev_hdl, "Allocate receive mbox message memory failed.\n");
+	if (!rcv_mbox_temp->mbox)
 		goto rcv_mbox_msg_err;
-	}
+
 	memcpy(rcv_mbox_temp->mbox, recv_mbox->mbox, MBOX_MAX_BUF_SZ);
 
 	rcv_mbox_temp->buf_out = kzalloc(MBOX_MAX_BUF_SZ, GFP_KERNEL);
@@ -883,10 +881,8 @@ bool check_vf_mbox_random_id(struct hinic_mbox_func_to_func *func_to_func,
 		 src, random_id, func_to_func->vf_mbx_rand_id[src]);
 
 	mbox_work = kzalloc(sizeof(*mbox_work), GFP_KERNEL);
-	if (!mbox_work) {
-		sdk_err(func_to_func->hwdev->dev_hdl, "Allocate mbox work memory failed.\n");
+	if (!mbox_work)
 		return false;
-	}
 
 	mbox_work->func_to_func = func_to_func;
 	mbox_work->src_func_idx = src;

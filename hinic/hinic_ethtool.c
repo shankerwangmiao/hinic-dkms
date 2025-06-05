@@ -834,9 +834,9 @@ static void hinic_get_drvinfo(struct net_device *netdev,
 	u8 mgmt_ver[HINIC_MGMT_VERSION_MAX_LEN] = {0};
 	int err;
 
-	strlcpy(info->driver, HINIC_DRV_NAME, sizeof(info->driver));
-	strlcpy(info->version, HINIC_DRV_VERSION, sizeof(info->version));
-	strlcpy(info->bus_info, pci_name(pdev), sizeof(info->bus_info));
+	strscpy(info->driver, HINIC_DRV_NAME, sizeof(info->driver));
+	strscpy(info->version, HINIC_DRV_VERSION, sizeof(info->version));
+	strscpy(info->bus_info, pci_name(pdev), sizeof(info->bus_info));
 
 	err = hinic_get_mgmt_version(nic_dev->hwdev, mgmt_ver);
 	if (err) {
@@ -1580,8 +1580,6 @@ static void hinic_get_ethtool_stats(struct net_device *netdev,
 	    FUNC_SUPPORT_PORT_SETTING(nic_dev->hwdev)) {
 		port_stats = kzalloc(sizeof(*port_stats), GFP_KERNEL);
 		if (!port_stats) {
-			nicif_err(nic_dev, drv, netdev,
-				  "Failed to malloc port stats\n");
 			memset(&data[i], 0,
 			       ARRAY_LEN(hinic_port_stats) * sizeof(*data));
 			i += ARRAY_LEN(hinic_port_stats);
@@ -1789,11 +1787,8 @@ static int hinic_run_lp_test(struct hinic_nic_dev *nic_dev, u32 test_time)
 	struct net_device *netdev = nic_dev->netdev;
 
 	skb_tmp = alloc_skb(LP_PKT_LEN, GFP_ATOMIC);
-	if (!skb_tmp) {
-		nicif_err(nic_dev, drv, netdev,
-			  "Alloc xmit skb template failed for loopback test\n");
+	if (!skb_tmp)
 		return -ENOMEM;
-	}
 
 	test_data = __skb_put(skb_tmp, LP_PKT_LEN);
 
@@ -1904,8 +1899,6 @@ void hinic_lp_test(struct net_device *netdev, struct ethtool_test *eth_test,
 
 	lb_test_rx_buf = vmalloc(LP_PKT_CNT * LP_PKT_LEN);
 	if (!lb_test_rx_buf) {
-		nicif_err(nic_dev, drv, netdev,
-			  "Failed to alloc rx buffer for loopback test\n");
 		err = 1;
 	} else {
 		nic_dev->lb_test_rx_buf = lb_test_rx_buf;
@@ -2412,6 +2405,9 @@ static const struct ethtool_ops hinic_ethtool_ops = {
 
 static const struct ethtool_ops hinicvf_ethtool_ops = {
 	.supported_coalesce_params = ETHTOOL_COALESCE_USECS |
+				     ETHTOOL_COALESCE_MAX_FRAMES |
+				     ETHTOOL_COALESCE_USECS_LOW_HIGH |
+				     ETHTOOL_COALESCE_MAX_FRAMES_LOW_HIGH |
 				     ETHTOOL_COALESCE_PKT_RATE_RX_USECS,
 	.get_link_ksettings = hinic_get_link_ksettings,
 	.get_drvinfo = hinic_get_drvinfo,

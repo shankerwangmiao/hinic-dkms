@@ -146,7 +146,7 @@ struct hinic_lld_lock {
 	atomic_t		dev_ref_cnt;
 };
 
-struct hinic_lld_lock g_lld_lock;
+static struct hinic_lld_lock g_lld_lock;
 
 #define WAIT_LLD_DEV_HOLD_TIMEOUT	(10 * 60 * 1000)	/* 10minutes */
 #define WAIT_LLD_DEV_NODE_CHANGED	(10 * 60 * 1000)	/* 10minutes */
@@ -953,7 +953,7 @@ int hinic_get_chip_name_by_hwdev(void *hwdev, char *ifname)
 				continue;
 
 			if (dev->hwdev == hwdev) {
-				strncpy(ifname, chip_node->chip_name,
+				strscpy(ifname, chip_node->chip_name,
 					IFNAMSIZ - 1);
 				ifname[IFNAMSIZ - 1] = 0;
 				lld_dev_put();
@@ -1251,7 +1251,7 @@ void hinic_get_card_info(void *hwdev, void *bufin)
 		     (hinic_support_fcoe(fun_hwdev, NULL))) &&
 		     dev->uld_dev[SERVICE_T_FC]) {
 			info->pf[i].pf_type |= (u32)BIT(SERVICE_T_FC);
-			strlcpy(info->pf[i].name,
+			strscpy(info->pf[i].name,
 				dev->uld_dev_name[SERVICE_T_FC], IFNAMSIZ);
 		}
 
@@ -1259,7 +1259,7 @@ void hinic_get_card_info(void *hwdev, void *bufin)
 			nic_dev = dev->uld_dev[SERVICE_T_NIC];
 			if (nic_dev) {
 				info->pf[i].pf_type |= (u32)BIT(SERVICE_T_NIC);
-				strlcpy(info->pf[i].name,
+				strscpy(info->pf[i].name,
 					nic_dev->netdev->name, IFNAMSIZ);
 			}
 		}
@@ -1277,7 +1277,7 @@ void hinic_get_card_info(void *hwdev, void *bufin)
 			info->pf[i].pf_type |= (u32)BIT(SERVICE_T_TOE);
 
 		if (hinic_func_for_mgmt(fun_hwdev))
-			strlcpy(info->pf[i].name, "FOR_MGMT", IFNAMSIZ);
+			strscpy(info->pf[i].name, "FOR_MGMT", IFNAMSIZ);
 
 		if (hinic_func_for_pt(fun_hwdev))
 			info->pf[i].pf_type |= (u32)BIT(SERVICE_T_PT);
@@ -1285,7 +1285,7 @@ void hinic_get_card_info(void *hwdev, void *bufin)
 		if (hinic_func_for_hwpt(fun_hwdev))
 			info->pf[i].pf_type |= (u32)BIT(SERVICE_T_HWPT);
 
-		strlcpy(info->pf[i].bus_info, pci_name(dev->pcidev),
+		strscpy(info->pf[i].bus_info, pci_name(dev->pcidev),
 			sizeof(info->pf[i].bus_info));
 		info->pf_num++;
 		i = info->pf_num;
@@ -1383,7 +1383,7 @@ int hinic_get_pf_id(void *hwdev, u32 port_id, u32 *pf_id, u32 *isvalid)
 	return 0;
 }
 
-void get_fc_devname(char *devname)
+void hinic_get_fc_devname(char *devname)
 {
 	struct card_node *chip_node;
 	struct hinic_pcidev *dev;
@@ -1401,7 +1401,7 @@ void get_fc_devname(char *devname)
 				continue;
 
 			if (dev->uld_dev[SERVICE_T_FC]) {
-				strlcpy(devname,
+				strscpy(devname,
 					dev->uld_dev_name[SERVICE_T_FC],
 					IFNAMSIZ);
 				lld_dev_put();
@@ -1966,8 +1966,7 @@ static int mapping_bar(struct pci_dev *pdev, struct hinic_pcidev *pci_adapter)
 
 #if defined(__aarch64__)
 	/* arm do not support call ioremap_wc() */
-	pci_adapter->dwqe_mapping = __ioremap(dwqe_addr, db_dwqe_size,
-					      __pgprot(PROT_DEVICE_nGnRnE));
+	pci_adapter->dwqe_mapping = ioremap(dwqe_addr, db_dwqe_size);
 #else
 	pci_adapter->dwqe_mapping = io_mapping_create_wc(dwqe_addr,
 							 db_dwqe_size);
@@ -2048,11 +2047,8 @@ static int alloc_chip_node(struct hinic_pcidev *pci_adapter)
 	}
 
 	chip_node = kzalloc(sizeof(*chip_node), GFP_KERNEL);
-	if (!chip_node) {
-		sdk_err(&pci_adapter->pcidev->dev,
-			"Failed to alloc chip node\n");
+	if (!chip_node)
 		goto alloc_chip_err;
-	}
 
 	chip_node->dbgtool_attr_file.name = kzalloc(IFNAMSIZ, GFP_KERNEL);
 	if (!(chip_node->dbgtool_attr_file.name)) {
@@ -2233,11 +2229,9 @@ static int hinic_pci_init(struct pci_dev *pdev)
 	}
 
 	pci_adapter = kzalloc(sizeof(*pci_adapter), GFP_KERNEL);
-	if (!pci_adapter) {
-		sdk_err(&pdev->dev,
-			"Failed to alloc pci device adapter\n");
+	if (!pci_adapter)
 		return -ENOMEM;
-	}
+
 	pci_adapter->pcidev = pdev;
 	mutex_init(&pci_adapter->pdev_mutex);
 
@@ -2262,25 +2256,25 @@ static int hinic_pci_init(struct pci_dev *pdev)
 		goto pci_regions_err;
 	}
 
-	pci_enable_pcie_error_reporting(pdev);
+	// pci_enable_pcie_error_reporting(pdev);
 
 	pci_set_master(pdev);
 
-	err = pci_set_dma_mask(pdev, DMA_BIT_MASK(64));
+	err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(64));
 	if (err) {
 		sdk_warn(&pdev->dev, "Couldn't set 64-bit DMA mask\n");
-		err = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+		err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
 		if (err) {
 			sdk_err(&pdev->dev, "Failed to set DMA mask\n");
 			goto dma_mask_err;
 		}
 	}
 
-	err = pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(64));
+	err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(64));
 	if (err) {
 		sdk_warn(&pdev->dev,
 			 "Couldn't set 64-bit coherent DMA mask\n");
-		err = pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(32));
+		err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
 		if (err) {
 			sdk_err(&pdev->dev,
 				"Failed to set coherent DMA mask\n");
@@ -2293,7 +2287,7 @@ static int hinic_pci_init(struct pci_dev *pdev)
 dma_consistnet_mask_err:
 dma_mask_err:
 	pci_clear_master(pdev);
-	pci_disable_pcie_error_reporting(pdev);
+	// pci_disable_pcie_error_reporting(pdev);
 	pci_release_regions(pdev);
 
 pci_regions_err:
@@ -2312,7 +2306,7 @@ static void hinic_pci_deinit(struct pci_dev *pdev)
 
 	pci_clear_master(pdev);
 	pci_release_regions(pdev);
-	pci_disable_pcie_error_reporting(pdev);
+	// pci_disable_pcie_error_reporting(pdev);
 	pci_disable_device(pdev);
 	pci_set_drvdata(pdev, NULL);
 	kfree(pci_adapter);
@@ -2441,7 +2435,7 @@ static int hinic_func_init(struct pci_dev *pdev,
 
 	/* dbgtool init */
 	lld_lock_chip_node();
-	err = dbgtool_knl_init(pci_adapter->hwdev, pci_adapter->chip_node);
+	err = hinic_dbgtool_knl_init(pci_adapter->hwdev, pci_adapter->chip_node);
 	if (err) {
 		lld_unlock_chip_node();
 		sdk_err(&pdev->dev, "Failed to initialize dbgtool\n");
@@ -2500,7 +2494,7 @@ static void hinic_func_deinit(struct pci_dev *pdev)
 
 	if (pci_adapter->init_state >= HINIC_INIT_STATE_DBGTOOL_INITED) {
 		lld_lock_chip_node();
-		dbgtool_knl_deinit(pci_adapter->hwdev, pci_adapter->chip_node);
+		hinic_dbgtool_knl_deinit(pci_adapter->hwdev, pci_adapter->chip_node);
 		lld_unlock_chip_node();
 		hinic_destroy_syncfw_timer(pci_adapter);
 		hinic_event_unregister(pci_adapter->hwdev);
@@ -2603,7 +2597,7 @@ static void hinic_remove(struct pci_dev *pdev)
 		lld_lock_chip_node();
 		if (pci_adapter->init_state < HINIC_INIT_STATE_HW_IF_INITED)
 			list_del(&pci_adapter->node);
-		nictool_k_uninit();
+		hinic_tool_k_uninit();
 		free_chip_node(pci_adapter);
 		lld_unlock_chip_node();
 		unmapping_bar(pci_adapter);
@@ -2720,7 +2714,7 @@ static int hinic_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	sscanf(pci_adapter->chip_node->chip_name, HINIC_CHIP_NAME "%d",
 	       &pci_adapter->card_id);
 
-	err = nictool_k_init();
+	err = hinic_tool_k_init();
 	if (err) {
 		sdk_warn(&pdev->dev, "Failed to init nictool");
 		goto init_nictool_err;
