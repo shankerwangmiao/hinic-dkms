@@ -1,0 +1,25 @@
+From 4125ee96793024180fbb07526529405f1d6b95e2 Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 10 Jul 2025 23:38:22 +0800
+Subject: [PATCH] Fix build error when CONFIG_PCI_IOV is not enabled
+
+---
+ hinic/hinic_lld.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/hinic/hinic_lld.c b/hinic/hinic_lld.c
+index a25801a..37689cc 100644
+--- a/hinic/hinic_lld.c
++++ b/hinic/hinic_lld.c
+@@ -65,6 +65,8 @@ static bool disable_vf_load;
+ module_param(disable_vf_load, bool, 0444);
+ MODULE_PARM_DESC(disable_vf_load,
+ 		 "Disable virtual functions probe or not - default is false");
++#else
++static const bool disable_vf_load = 0;
+ #endif /* CONFIG_PCI_IOV */
+ 
+ enum {
+-- 
+2.49.0
+

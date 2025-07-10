@@ -6,3 +6,4 @@
 0006-Fix-build-error-when-CONFIG_DCB-is-not-enabled.patch
 0007-add-compat-for-missing-struct-rxfh.patch
 0008-Fix-build-error-when-CONFIG_VLAN_8021Q-is-not-enable.patch
+0009-Fix-build-error-when-CONFIG_PCI_IOV-is-not-enabled.patch
