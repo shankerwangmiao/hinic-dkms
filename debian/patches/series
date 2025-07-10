@@ -7,3 +7,12 @@
 0007-add-compat-for-missing-struct-rxfh.patch
 0008-Fix-build-error-when-CONFIG_VLAN_8021Q-is-not-enable.patch
 0009-Fix-build-error-when-CONFIG_PCI_IOV-is-not-enabled.patch
+0010-Fix-build-error-for-API-change-in-class_create.patch
+0011-Fix-build-error-for-API-change-in-netif_napi_add.patch
+0012-Fix-build-error-for-API-change-in-ethtool_get_ringpa.patch
+0013-Fix-build-error-for-API-change-in-eth_hw_addr_set.patch
+0014-Fix-build-error-for-API-change-in-kmap_local_page.patch
+0015-Fix-build-error-for-API-change-in-ethtool_get_coales.patch
+0016-Fix-build-error-for-API-change-in-ndo_tx_timeout.patch
+0017-Fix-build-error-for-API-change-in-ethtool_supported_.patch
+0018-Supress-unused-warnings-by-adding-attributes.patch

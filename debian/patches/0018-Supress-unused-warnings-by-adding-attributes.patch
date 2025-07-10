@@ -1,0 +1,102 @@
+From 138fb78e3f2486dc8f22460045aa609ff6d83956 Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Fri, 11 Jul 2025 20:54:30 +0800
+Subject: [PATCH] Supress unused warnings by adding attributes
+
+---
+ hinic/hinic_lld.c             |  2 +-
+ hinic/hinic_main.c            |  2 ++
+ hinic/hinic_multi_host_mgmt.c | 14 ++++++++------
+ hinic/hinic_nic_cfg.c         |  8 ++++++--
+ 4 files changed, 17 insertions(+), 9 deletions(-)
+
+diff --git a/hinic/hinic_lld.c b/hinic/hinic_lld.c
+index 71c914d..89b2d34 100644
+--- a/hinic/hinic_lld.c
++++ b/hinic/hinic_lld.c
+@@ -2126,7 +2126,7 @@ static void free_chip_node(struct hinic_pcidev *pci_adapter)
+ 	}
+ }
+ 
+-static bool hinic_get_vf_load_state(struct pci_dev *pdev)
++static bool __maybe_unused hinic_get_vf_load_state(struct pci_dev *pdev)
+ {
+ 	unsigned char parent_bus_number;
+ 	struct card_node *chip_node;
+diff --git a/hinic/hinic_main.c b/hinic/hinic_main.c
+index 23c159b..b4d955a 100644
+--- a/hinic/hinic_main.c
++++ b/hinic/hinic_main.c
+@@ -196,9 +196,11 @@ static int hinic_netdev_event(struct notifier_block *notifier,
+ 		       unsigned long event, void *ptr)
+ {
+ 	struct net_device *ndev = netdev_notifier_info_to_dev(ptr);
++#if IS_ENABLED(CONFIG_VLAN_8021Q)
+ 	struct net_device *real_dev, *ret;
+ 	struct hinic_nic_dev *nic_dev;
+ 	u16 vlan_depth;
++#endif
+ 
+ 	if (!is_vlan_dev(ndev))
+ 		return NOTIFY_DONE;
+diff --git a/hinic/hinic_multi_host_mgmt.c b/hinic/hinic_multi_host_mgmt.c
+index 4a10c4a..36f5fc8 100644
+--- a/hinic/hinic_multi_host_mgmt.c
++++ b/hinic/hinic_multi_host_mgmt.c
+@@ -626,9 +626,9 @@ static int comm_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cmd,
+ 					  out_size);
+ }
+ 
+-static void comm_ppf_to_pf_handler(void *handle, u8 cmd,
+-			    void *buf_in, u16 in_size,
+-			    void *buf_out, u16 *out_size)
++static void __always_unused comm_ppf_to_pf_handler(void *handle, u8 cmd,
++						   void *buf_in, u16 in_size,
++						   void *buf_out, u16 *out_size)
+ {
+ 	struct hinic_hwdev *hwdev = handle;
+ 
+@@ -653,9 +653,11 @@ static int hinic_nic_ppf_mbox_handler(void *handle, u16 pf_idx, u16 vf_id, u8 cm
+ 					  buf_out, out_size);
+ }
+ 
+-static void hinic_nic_ppf_to_pf_handler(void *handle, u8 cmd,
+-				 void *buf_in, u16 in_size,
+-				 void *buf_out, u16 *out_size)
++static void __always_unused hinic_nic_ppf_to_pf_handler(void *handle, u8 cmd,
++							void *buf_in,
++							u16 in_size,
++							void *buf_out,
++							u16 *out_size)
+ {
+ 	struct hinic_hwdev *hwdev = handle;
+ 
+diff --git a/hinic/hinic_nic_cfg.c b/hinic/hinic_nic_cfg.c
+index acbc556..aba9f3d 100644
+--- a/hinic/hinic_nic_cfg.c
++++ b/hinic/hinic_nic_cfg.c
+@@ -528,7 +528,9 @@ int hinic_set_port_mtu(void *hwdev, u32 new_mtu)
+ 	return 0;
+ }
+ 
+-static int hinic_hiovs_set_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
++static int __always_unused hinic_hiovs_set_cpath_vlan(void *hwdev,
++						      u16 vlan_id,
++						      u16 pf_id)
+ {
+ 	struct hinic_hwdev *nic_hwdev = (struct hinic_hwdev *)hwdev;
+ 	struct cmd_cpath_vlan cpath_vlan_info = {0};
+@@ -554,7 +556,9 @@ static int hinic_hiovs_set_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
+ 	return 0;
+ }
+ 
+-static int hinic_hiovs_del_cpath_vlan(void *hwdev, u16 vlan_id, u16 pf_id)
++static int __always_unused hinic_hiovs_del_cpath_vlan(void *hwdev,
++						      u16 vlan_id,
++						      u16 pf_id)
+ {
+ 	struct hinic_hwdev *nic_hwdev = (struct hinic_hwdev *)hwdev;
+ 	struct cmd_cpath_vlan cpath_vlan_info = {0};
+-- 
+2.49.0
+
