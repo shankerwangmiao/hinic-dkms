@@ -1,4 +1,4 @@
-From 24d09b9ce0950450d7d317c5d87c286677985d0f Mon Sep 17 00:00:00 2001
+From bdd67e3f13038edc98d1e9eac1f7c1a0bbd189e3 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:07:44 +0800
 Subject: [PATCH] migrate for kAPI changes
@@ -10,7 +10,7 @@ get/set_rxfh ethtool ops)
  1 file changed, 16 insertions(+), 15 deletions(-)
 
 diff --git a/hinic/hinic_ethtool.c b/hinic/hinic_ethtool.c
-index 5ab2158..95045cf 100644
+index 5ab2158..0a2900f 100644
 --- a/hinic/hinic_ethtool.c
 +++ b/hinic/hinic_ethtool.c
 @@ -2294,7 +2294,7 @@ static u32 hinic_get_rxfh_key_size(struct net_device *netdev)
@@ -27,7 +27,7 @@ index 5ab2158..95045cf 100644
  		return -EOPNOTSUPP;
  
 -	if (hfunc) {
-+	if (rxfh->hfunc) {
++	if (1) {
  		u8 hash_engine_type = 0;
  
  		err = hinic_rss_get_hash_engine(nic_dev->hwdev,

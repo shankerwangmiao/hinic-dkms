@@ -1,6 +1,14 @@
+hinic (0+git20250605+6.6.0-95.0.0-2) UNRELEASED; urgency=low
+
+  * Add patches for compatibility with 6.6 kernels
+  * Add patch to fix build error when CONFIG_DCB is not enabled
+
+ -- Miao Wang <shankerwangmiao@gmail.com>  Thu, 10 Jul 2025 19:16:00 +0800
+
 hinic (0+git20250605+6.6.0-95.0.0-1) unstable; urgency=low
 
   * Import changes from 6.6.0-95.0.0
+  * Necessary changes for building with 6.12 kernels
 
  -- Miao Wang <shankerwangmiao@gmail.com>  Thu, 05 Jun 2025 19:16:00 +0800
 

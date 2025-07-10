@@ -1,0 +1,40 @@
+From 0f0dd930d5bad2db5176cf821652f21ea4e0316b Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 10 Jul 2025 19:00:56 +0800
+Subject: [PATCH] Fix build error when CONFIG_DCB is not enabled
+
+---
+ hinic/hinic_main.c    | 2 ++
+ hinic/hinic_nic_dev.h | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/hinic/hinic_main.c b/hinic/hinic_main.c
+index e96af33..684dc07 100644
+--- a/hinic/hinic_main.c
++++ b/hinic/hinic_main.c
+@@ -2287,8 +2287,10 @@ static void hinic_assign_netdev_ops(struct hinic_nic_dev *adapter)
+ {
+ 	if (!HINIC_FUNC_IS_VF(adapter->hwdev)) {
+ 		adapter->netdev->netdev_ops = &hinic_netdev_ops;
++#ifdef CONFIG_DCB
+ 		if (FUNC_SUPPORT_DCB(adapter->hwdev))
+ 			adapter->netdev->dcbnl_ops = &hinic_dcbnl_ops;
++#endif /* CONFIG_DCB */
+ 		hinic_set_ethtool_ops(adapter->netdev);
+ 	} else {
+ 		adapter->netdev->netdev_ops = &hinicvf_netdev_ops;
+diff --git a/hinic/hinic_nic_dev.h b/hinic/hinic_nic_dev.h
+index 1e6479a..df23e32 100644
+--- a/hinic/hinic_nic_dev.h
++++ b/hinic/hinic_nic_dev.h
+@@ -20,6 +20,7 @@
+ #include <linux/semaphore.h>
+ #include <linux/types.h>
+ #include <linux/bitops.h>
++#include <net/dcbnl.h>
+ 
+ #include "ossl_knl.h"
+ #include "hinic_nic_io.h"
+-- 
+2.49.0
+

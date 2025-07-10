@@ -3,3 +3,5 @@
 0003-prevent-the-use-of-snprintf-buf-s.-buf.patch
 0004-migrate-for-kAPI-changes.patch
 0005-use-skb_frag_off-functions-instead-of-directly-acces.patch
+0006-Fix-build-error-when-CONFIG_DCB-is-not-enabled.patch
+0007-add-compat-for-missing-struct-rxfh.patch
