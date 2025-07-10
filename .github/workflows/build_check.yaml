@@ -1,0 +1,90 @@
+name: Build Check on Multiple Kernel Versions
+
+on:
+  push:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        kernel:
+          - version: "v6.12"
+            patches: ""
+            assert_have_all: true
+          - version: "v6.6"
+            patches: ""
+          - version: "v6.1"
+            patches: ""
+          - version: "v5.15"
+            patches: "52a9dab6d892"
+          - version: "v5.10"
+            patches: "1d489151e9f9 52a9dab6d892"
+          - version: "v5.4"
+            patches: "6c4798d3f08b 1d489151e9f9 52a9dab6d892"
+        additional_configs: ["CONFIG_DCB=y CONFIG_VLAN_8021Q=m CONFIG_PCI_IOV=y", "CONFIG_DCB=n CONFIG_VLAN_8021Q=n CONFIG_PCI_IOV=n"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y build-essential flex bison bc quilt libssl-dev libelf-dev
+
+      - name: Apply patches
+        run: |
+          QUILT_PATCHES="debian/patches" quilt push -a
+
+      - name: Clone Kernel Source
+        run: |
+          mkdir -p "$HOME/kernel"
+          git clone --filter="tree:0" --branch ${{matrix.kernel.version}} https://github.com/gregkh/linux "$HOME/kernel"
+          if [ -n "${{matrix.kernel.patches}}" ]; then
+            git -C "$HOME/kernel" -c user.name="Github Runner" -c user.email="github.runner@example.com" cherry-pick --empty=drop ${{matrix.kernel.patches}}
+          fi
+
+      - name: Set up kernel configuration
+        run: |
+          mkdir -p "$HOME/kernel-build"
+          make -C "$HOME/kernel" O="$HOME/kernel-build" defconfig
+          for config in ${{matrix.additional_configs}} CONFIG_WERROR=n CONFIG_MODVERSIONS=y; do
+            config_key=$(echo "$config" | cut -d= -f1)
+            config_value=$(echo "$config" | cut -d= -f2)
+            grep -Fv "$config_key" "$HOME/kernel-build/.config" > "$HOME/kernel-build/.config.tmp"
+            if [ "$config_value" = "n" ]; then
+              echo "# $config_key is not set" >> "$HOME/kernel-build/.config.tmp"
+            else
+              echo "$config_key=$config_value" >> "$HOME/kernel-build/.config.tmp"
+            fi
+            mv "$HOME/kernel-build/.config.tmp" "$HOME/kernel-build/.config"
+          done
+          make -C "$HOME/kernel-build" olddefconfig
+
+      - name: Prepare Kernel Build
+        run: |
+          make -C "$HOME/kernel-build" prepare
+
+      - name: Compile Module
+        run: |
+          make -C "$HOME/kernel-build" M="$PWD/hinic" CONFIG_HINIC=m hinic.o
+
+      - name: Check if All Feature Tests Successful
+        if: ${{ matrix.kernel.assert_have_all }}
+        run: |
+          if ! grep -q "undef" "$PWD/hinic/feature_test.h"; then
+            echo "All feature tests passed."
+          else
+            echo "Some feature tests failed. Please check the output."
+            cat "$PWD/hinic/feature_test.h"
+            exit 1
+          fi
+
+      - name: Compile Kernel Image for Finally Linking
+        run: |
+          make -C "$HOME/kernel-build" -j "$(nproc)" KBUILD_MODULES=y vmlinux modules_prepare
+
+      - name: Final Linking
+        run: |
+          make -C "$HOME/kernel-build" M="$PWD/hinic" CONFIG_HINIC=m modules
