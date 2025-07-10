@@ -1,0 +1,34 @@
+From 6abd071bcefd973962dba82c062fb374053385de Mon Sep 17 00:00:00 2001
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Thu, 10 Jul 2025 22:54:25 +0800
+Subject: [PATCH] Fix build error when CONFIG_VLAN_8021Q is not enabled
+
+---
+ hinic/hinic_main.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/hinic/hinic_main.c b/hinic/hinic_main.c
+index 684dc07..af35cdb 100644
+--- a/hinic/hinic_main.c
++++ b/hinic/hinic_main.c
+@@ -190,6 +190,7 @@ static int hinic_netdev_event(struct notifier_block *notifier,
+ 	if (!is_vlan_dev(ndev))
+ 		return NOTIFY_DONE;
+ 
++#if IS_ENABLED(CONFIG_VLAN_8021Q)
+ 	dev_hold(ndev);
+ 
+ 	switch (event) {
+@@ -223,6 +224,9 @@ static int hinic_netdev_event(struct notifier_block *notifier,
+ out:
+ 	dev_put(ndev);
+ 
++#else
++	BUG();
++#endif
+ 	return NOTIFY_DONE;
+ }
+ 
+-- 
+2.49.0
+
