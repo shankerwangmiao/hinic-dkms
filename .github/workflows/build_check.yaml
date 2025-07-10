@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  build:
+  build-kmod:
     strategy:
       fail-fast: false
       matrix:
@@ -88,3 +88,74 @@ jobs:
       - name: Final Linking
         run: |
           make -C "$HOME/kernel-build" M="$PWD/hinic" CONFIG_HINIC=m modules
+
+
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y git-buildpackage
+
+      - name: Generate original tarball
+        run: |
+          git fetch origin --tags
+          gbp export-orig --compression=xz
+          ls -la ../
+
+      - name: Build Debian package
+        run: |
+          docker run -d --name builder --rm -v "$PWD/..:/$PWD/.." -w "$PWD" debian:sid bash -c "trap 'exit 0' TERM; exec 3<> <(:); read <&3"
+          docker exec builder bash -c "apt-get update && apt-get build-dep -y --no-install-recommends ."
+          docker exec -u "$(id -u):$(id -g)" builder bash -c "dpkg-buildpackage -us -uc"
+          ls -la ../
+
+      - name: Collect files
+        shell: bash
+        id: collect_files
+        run: |
+          files=()
+          for changes in ../*.changes; do
+            if [ -f "$changes" ]; then
+              echo "Collecting files from $changes"
+              files+=("$(readlink -f "$changes")")
+              dirname=$(dirname -- "$changes")
+              while IFS= read -r file; do
+                if [ -f "$dirname/$file" ]; then
+                  echo "Adding file: $dirname/$file"
+                  files+=("$(readlink -f "$dirname/$file")")
+                  if [[ "$file" == *.dsc ]]; then
+                    echo "Found dsc file: $dirname/$file"
+                    while IFS= read -r line; do
+                      if [ -f "$dirname/$line" ]; then
+                        echo "Adding file from dsc: $dirname/$line"
+                        files+=("$(readlink -f "$dirname/$line")")
+                      fi
+                    done < <(sed --silent '/Sha256/,/Files/p' "$dirname/$file" | grep " " | cut -d ' ' -f 4)
+                  fi
+                fi
+              done < <(sed --silent '/Sha256/,/Files/p' "$changes" | grep " " | cut -d ' ' -f 4)
+            fi
+          done
+          (
+            echo "files<<EOF"
+            for file in "${files[@]}"; do
+              echo "$file"
+            done
+            echo "EOF"
+          ) >> "$GITHUB_OUTPUT"
+
+      - name: Upload files
+        uses: actions/upload-artifact@v4
+        with:
+          name: hinic-dkms
+          path: ${{ steps.collect_files.outputs.files }}
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker kill -s TERM builder || true
