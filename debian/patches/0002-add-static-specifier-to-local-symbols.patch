@@ -1,4 +1,4 @@
-From cbcda5536680178805b7185c029e6b84f7a95dae Mon Sep 17 00:00:00 2001
+From b7279cfa98594b63369ee3074571ee232533bdc5 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:04:31 +0800
 Subject: [PATCH] add static specifier to local symbols
@@ -11,7 +11,7 @@ To fix the no previous prototype warnings
  hinic/hinic_ethtool.c         |  3 ++-
  hinic/hinic_hw_mgmt.h         |  1 +
  hinic/hinic_hwdev.c           | 26 +++++++++++++-------------
- hinic/hinic_lld.c             | 10 +++++-----
+ hinic/hinic_lld.c             | 12 ++++++------
  hinic/hinic_lld.h             |  5 +++++
  hinic/hinic_main.c            |  4 ++--
  hinic/hinic_mbox.c            |  6 +++---
@@ -22,7 +22,7 @@ To fix the no previous prototype warnings
  hinic/hinic_rx.c              |  6 +++---
  hinic/hinic_sml_counter.c     |  1 +
  hinic/hinic_tx.c              |  4 ++--
- 17 files changed, 68 insertions(+), 64 deletions(-)
+ 17 files changed, 69 insertions(+), 65 deletions(-)
 
 diff --git a/hinic/hinic_cfg.c b/hinic/hinic_cfg.c
 index 0c3d362..ca56eb2 100644
@@ -263,7 +263,7 @@ index cbadbbd..50d5c8f 100644
  {
  	struct hinic_phy_init_status phy_info = {0};
 diff --git a/hinic/hinic_lld.c b/hinic/hinic_lld.c
-index 76ca3fb..a25801a 100644
+index 76ca3fb..183c3e0 100644
 --- a/hinic/hinic_lld.c
 +++ b/hinic/hinic_lld.c
 @@ -444,7 +444,7 @@ static void hinic_syncfw_timer_handler(struct timer_list *t)
@@ -311,6 +311,15 @@ index 76ca3fb..a25801a 100644
  {
  	struct hinic_pcidev *dev = adapter;
  	u16 func_id;
+@@ -2349,7 +2349,7 @@ static void hinic_notify_ppf_reg(struct hinic_pcidev *pci_adapter)
+  * @pci_adapter: pci adapter
+  */
+ /*lint -save -e40 */
+-void cfg_order_reg(struct hinic_pcidev *pci_adapter)
++static void cfg_order_reg(struct hinic_pcidev *pci_adapter)
+ {
+ 	u8 cpu_model[] = {0x3c, 0x3f, 0x45, 0x46, 0x3d, 0x47, 0x4f, 0x56};
+ 	struct cpuinfo_x86 *cpuinfo;
 diff --git a/hinic/hinic_lld.h b/hinic/hinic_lld.h
 index 414dfd1..79c8229 100644
 --- a/hinic/hinic_lld.h
