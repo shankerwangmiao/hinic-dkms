@@ -1,0 +1,62 @@
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Sun, 4 Jan 2026 21:24:33 +0800
+Subject: Fix build error for API change in GRO and NAPI layer
+
+---
+ hinic/Makefile                               | 2 ++
+ hinic/feature_test_napi_gro_flush_in_gro_h.c | 8 ++++++++
+ hinic/hinic_rx.c                             | 6 ++++++
+ 3 files changed, 16 insertions(+)
+ create mode 100644 hinic/feature_test_napi_gro_flush_in_gro_h.c
+
+diff --git a/hinic/Makefile b/hinic/Makefile
+index 2f7e47b..d94717a 100644
+--- a/hinic/Makefile
++++ b/hinic/Makefile
+@@ -18,6 +18,7 @@ $(obj)/hinic_main.o \
+ $(obj)/hinic_tx.o \
+ $(obj)/hinic_hwdev.o \
+ $(obj)/hinic_lld.o \
++$(obj)/hinic_rx.o \
+ 	: $(obj)/feature_test.h
+ 
+ feature_test := \
+@@ -32,6 +33,7 @@ feature_test := \
+ 	ndo_tx_timeout_two \
+ 	ethtool_supported_coalesce_params \
+ 	timer_delete_sync \
++	napi_gro_flush_in_gro_h \
+ 
+ $(obj)/feature_test_%.result: $(src)/feature_test_%.c
+ 	$(Q)echo "Checking feature test for $*..."; \
+diff --git a/hinic/feature_test_napi_gro_flush_in_gro_h.c b/hinic/feature_test_napi_gro_flush_in_gro_h.c
+new file mode 100644
+index 0000000..1ec39b0
+--- /dev/null
++++ b/hinic/feature_test_napi_gro_flush_in_gro_h.c
+@@ -0,0 +1,8 @@
++#include <net/gro.h>
++
++int test(void);
++
++int test(void){
++    napi_gro_flush(NULL, false);
++    return 0;
++}
+diff --git a/hinic/hinic_rx.c b/hinic/hinic_rx.c
+index cf291c7..3034232 100644
+--- a/hinic/hinic_rx.c
++++ b/hinic/hinic_rx.c
+@@ -31,6 +31,12 @@
+ #include <linux/pkt_sched.h>
+ #include <linux/ipv6.h>
+ 
++#include "feature_test.h"
++
++#ifdef HAVE_NAPI_GRO_FLUSH_IN_GRO_H
++#include <net/gro.h>
++#endif
++
+ #include "ossl_knl.h"
+ #include "hinic_hw.h"
+ #include "hinic_hw_mgmt.h"

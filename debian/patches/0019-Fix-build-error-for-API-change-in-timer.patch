@@ -1,0 +1,127 @@
+From: Miao Wang <shankerwangmiao@gmail.com>
+Date: Sun, 4 Jan 2026 18:17:44 +0800
+Subject: Fix build error for API change in timer
+
+---
+ hinic/Makefile                         |  3 +++
+ hinic/feature_test_timer_delete_sync.c |  7 +++++++
+ hinic/hinic_hwdev.c                    | 14 +++++++++++++-
+ hinic/hinic_lld.c                      | 15 +++++++++++++--
+ 4 files changed, 36 insertions(+), 3 deletions(-)
+ create mode 100644 hinic/feature_test_timer_delete_sync.c
+
+diff --git a/hinic/Makefile b/hinic/Makefile
+index e797d8f..2f7e47b 100644
+--- a/hinic/Makefile
++++ b/hinic/Makefile
+@@ -16,6 +16,8 @@ $(obj)/hinic_dbgtool_knl.o \
+ $(obj)/hinic_nictool.o \
+ $(obj)/hinic_main.o \
+ $(obj)/hinic_tx.o \
++$(obj)/hinic_hwdev.o \
++$(obj)/hinic_lld.o \
+ 	: $(obj)/feature_test.h
+ 
+ feature_test := \
+@@ -29,6 +31,7 @@ feature_test := \
+ 	ethtool_get_coalesce_four \
+ 	ndo_tx_timeout_two \
+ 	ethtool_supported_coalesce_params \
++	timer_delete_sync \
+ 
+ $(obj)/feature_test_%.result: $(src)/feature_test_%.c
+ 	$(Q)echo "Checking feature test for $*..."; \
+diff --git a/hinic/feature_test_timer_delete_sync.c b/hinic/feature_test_timer_delete_sync.c
+new file mode 100644
+index 0000000..f1184f4
+--- /dev/null
++++ b/hinic/feature_test_timer_delete_sync.c
+@@ -0,0 +1,7 @@
++#include <linux/timer.h>
++
++void test(void);
++
++void test(void) {
++    timer_delete_sync(NULL);
++}
+diff --git a/hinic/hinic_hwdev.c b/hinic/hinic_hwdev.c
+index c0f59cf..1cf49a3 100644
+--- a/hinic/hinic_hwdev.c
++++ b/hinic/hinic_hwdev.c
+@@ -43,6 +43,8 @@
+ #include "hinic_mgmt_interface.h"
+ #include "hinic_multi_host_mgmt.h"
+ 
++#include "feature_test.h"
++
+ #define HINIC_DEAULT_EQ_MSIX_PENDING_LIMIT	0
+ #define HINIC_DEAULT_EQ_MSIX_COALESC_TIMER_CFG	0xFF
+ #define HINIC_DEAULT_EQ_MSIX_RESEND_TIMER_CFG	7
+@@ -4462,7 +4464,13 @@ static void hinic_heartbeat_event_handler(struct work_struct *work)
+ 
+ static void hinic_heartbeat_timer_handler(struct timer_list *t)
+ {
+-	struct hinic_hwdev *hwdev = from_timer(hwdev, t, heartbeat_timer);
++	struct hinic_hwdev *hwdev =
++	#ifdef timer_container_of
++	timer_container_of(hwdev, t, heartbeat_timer)
++	#else
++	from_timer(hwdev, t, heartbeat_timer)
++	#endif
++	;
+ 
+ 	if (!hinic_get_heartbeat_status(hwdev)) {
+ 		hwdev->heartbeat_lost = 1;
+@@ -4487,7 +4495,11 @@ void hinic_init_heartbeat(struct hinic_hwdev *hwdev)
+ 
+ void hinic_destroy_heartbeat(struct hinic_hwdev *hwdev)
+ {
++	#ifdef HAVE_TIMER_DELETE_SYNC
++	timer_delete_sync(&hwdev->heartbeat_timer);
++	#else
+ 	del_timer_sync(&hwdev->heartbeat_timer);
++	#endif
+ }
+ 
+ u8 hinic_nic_sw_aeqe_handler(void *handle, u8 event, u64 data)
+diff --git a/hinic/hinic_lld.c b/hinic/hinic_lld.c
+index 89b2d34..ecaa3e3 100644
+--- a/hinic/hinic_lld.c
++++ b/hinic/hinic_lld.c
+@@ -38,6 +38,8 @@
+ #include "hinic_dbgtool_knl.h"
+ #include "hinic_nictool.h"
+ 
++#include "feature_test.h"
++
+ #define HINIC_PCI_CFG_REG_BAR		0
+ #define HINIC_PCI_INTR_REG_BAR		2
+ #define HINIC_PCI_DB_BAR		4
+@@ -435,8 +437,13 @@ EXPORT_SYMBOL(hinic_unregister_uld);
+ 
+ static void hinic_syncfw_timer_handler(struct timer_list *t)
+ {
+-	struct hinic_pcidev *pci_adapter = from_timer(pci_adapter, t,
+-						      syncfw_time_timer);
++	struct hinic_pcidev *pci_adapter =
++	#ifdef timer_container_of
++		timer_container_of(pci_adapter, t, syncfw_time_timer)
++	#else
++		from_timer(pci_adapter, t, syncfw_time_timer)
++	#endif
++	;
+ 	u64 tv_msec;
+ 
+ 	tv_msec = ktime_to_ms(ktime_get_real());
+@@ -467,7 +474,11 @@ static void hinic_destroy_syncfw_timer(struct hinic_pcidev *pci_adapter)
+ 	    hinic_func_type(pci_adapter->hwdev) != TYPE_PPF)
+ 		return;
+ 
++	#ifdef HAVE_TIMER_DELETE_SYNC
++	timer_delete_sync(&pci_adapter->syncfw_time_timer);
++	#else
+ 	del_timer_sync(&pci_adapter->syncfw_time_timer);
++	#endif
+ }
+ 
+ static void hinic_sync_time_to_fmw(struct hinic_pcidev *pdev_pri)

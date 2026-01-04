@@ -1,7 +1,6 @@
-From 6abd071bcefd973962dba82c062fb374053385de Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 10 Jul 2025 22:54:25 +0800
-Subject: [PATCH] Fix build error when CONFIG_VLAN_8021Q is not enabled
+Subject: Fix build error when CONFIG_VLAN_8021Q is not enabled
 
 ---
  hinic/hinic_main.c | 4 ++++
@@ -29,6 +28,3 @@ index 684dc07..af35cdb 100644
  	return NOTIFY_DONE;
  }
  
--- 
-2.49.0
-

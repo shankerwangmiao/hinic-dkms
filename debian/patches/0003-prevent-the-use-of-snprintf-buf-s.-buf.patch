@@ -1,7 +1,6 @@
-From 55f94b4e9a6196df3169bcb8174df4b160429a0a Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:06:26 +0800
-Subject: [PATCH] prevent the use of snprintf(buf, , "%s...", buf, ...)
+Subject: prevent the use of snprintf(buf, , "%s...", buf, ...)
 
 which is UB
 ---
@@ -98,6 +97,3 @@ index 50d5c8f..c0f59cf 100644
  			sdk_err(hwdev->dev_hdl,
  				"Failed snprintf power info, function return(%d) and dest_len(%d)\n",
  				err, CAP_INFO_MAC_LEN);
--- 
-2.49.0
-

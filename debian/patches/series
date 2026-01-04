@@ -4,6 +4,7 @@
 0004-migrate-for-kAPI-changes.patch
 0005-use-skb_frag_off-functions-instead-of-directly-acces.patch
 0006-Fix-build-error-when-CONFIG_DCB-is-not-enabled.patch
+0007-Add-feature-test-system.patch
 0007-add-compat-for-missing-struct-rxfh.patch
 0008-Fix-build-error-when-CONFIG_VLAN_8021Q-is-not-enable.patch
 0009-Fix-build-error-when-CONFIG_PCI_IOV-is-not-enabled.patch
@@ -16,3 +17,5 @@
 0016-Fix-build-error-for-API-change-in-ndo_tx_timeout.patch
 0017-Fix-build-error-for-API-change-in-ethtool_supported_.patch
 0018-Supress-unused-warnings-by-adding-attributes.patch
+0019-Fix-build-error-for-API-change-in-timer.patch
+0021-Fix-build-error-for-API-change-in-GRO-and-NAPI-layer.patch

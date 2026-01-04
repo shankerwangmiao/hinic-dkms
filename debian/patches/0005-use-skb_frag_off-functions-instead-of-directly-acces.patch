@@ -1,7 +1,6 @@
-From 0a81ac5683a8efd51bcd2c96851cfe3eac1eb755 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:10:58 +0800
-Subject: [PATCH] use skb_frag_off* functions instead of directly access to the
+Subject: use skb_frag_off* functions instead of directly access to the
  members
 
 ---
@@ -35,6 +34,3 @@ index 802bfe2..cd4cce0 100644
  			kunmap_local(vaddr);
  			cpy_buff += nsize;
  		}
--- 
-2.49.0
-

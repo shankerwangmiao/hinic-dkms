@@ -1,7 +1,6 @@
-From f7800597649f7d42e8c8e7ecdcc9cd1ecf86a0f0 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:01:54 +0800
-Subject: [PATCH] Kconfig: enable compiling on all arches
+Subject: Kconfig: enable compiling on all arches
 
 ---
  hinic/Kconfig | 2 +-
@@ -20,6 +19,3 @@ index b47bd54..1dbe0a0 100644
  	select NET_DEVLINK
  	help
  	  This driver supports HiNIC PCIE Ethernet cards.
--- 
-2.49.0
-

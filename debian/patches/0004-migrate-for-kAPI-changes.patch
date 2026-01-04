@@ -1,7 +1,6 @@
-From bdd67e3f13038edc98d1e9eac1f7c1a0bbd189e3 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:07:44 +0800
-Subject: [PATCH] migrate for kAPI changes
+Subject: migrate for kAPI changes
 
 in commit fb6e30a72539 ("net: ethtool: pass a pointer to parameters to
 get/set_rxfh ethtool ops)
@@ -103,6 +102,3 @@ index 5ab2158..0a2900f 100644
  
  	return err;
  }
--- 
-2.49.0
-

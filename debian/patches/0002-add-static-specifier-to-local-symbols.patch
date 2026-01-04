@@ -1,7 +1,6 @@
-From b7279cfa98594b63369ee3074571ee232533bdc5 Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:04:31 +0800
-Subject: [PATCH] add static specifier to local symbols
+Subject: add static specifier to local symbols
 
 To fix the no previous prototype warnings
 ---
@@ -686,6 +685,3 @@ index 7eb85bf..802bfe2 100644
  {
  	struct hinic_nic_dev *nic_dev = netdev_priv(txq->netdev);
  	unsigned long timeout;
--- 
-2.49.0
-

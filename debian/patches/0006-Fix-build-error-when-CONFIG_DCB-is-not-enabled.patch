@@ -1,7 +1,6 @@
-From 0f0dd930d5bad2db5176cf821652f21ea4e0316b Mon Sep 17 00:00:00 2001
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 10 Jul 2025 19:00:56 +0800
-Subject: [PATCH] Fix build error when CONFIG_DCB is not enabled
+Subject: Fix build error when CONFIG_DCB is not enabled
 
 ---
  hinic/hinic_main.c    | 2 ++
@@ -35,6 +34,3 @@ index 1e6479a..df23e32 100644
  
  #include "ossl_knl.h"
  #include "hinic_nic_io.h"
--- 
-2.49.0
-
