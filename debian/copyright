@@ -2,16 +2,15 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hinic
 Source: https://gitee.com/openeuler/kernel/tree/OLK-5.10/drivers/net/ethernet/huawei/hinic
 
+Files: *
+Copyright: 2021 Miao Wang <shankerwangmiao@gmail.com>
+License: GPL-2.0+
+
 Files: hinic/*
 Copyright: 2017 Huawei Technologies Co., Ltd
 License: GPL-2.0
 
-Files: *
-Copyright: 2021 Miao Wang <shankerwangmiao@gmail.com>
-License: GPL-2+
-
-License: 
-License: GPL-2+
+License: GPL-2.0+
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU General Public License as published by the Free Software
  Foundation; either version 2 of the License, or (at your option) any later
@@ -22,8 +21,23 @@ License: GPL-2+
  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  .
  You should have received a copy of the GNU General Public License along with
- this package; if not, write to the Free Software Foundation, Inc., 51 Franklin
- St, Fifth Floor, Boston, MA  02110-1301 USA
+ this package; if not, see <https://www.gnu.org/licenses/>.
  .
  On Debian systems, the full text of the GNU General Public License version 2
  can be found in the file /usr/share/common-licenses/GPL-2.
+
+License: GPL-2.0
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License version 2 as
+ published by the Free Software Foundation.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General Public License version
+ 2 can be found in `/usr/share/common-licenses/GPL-2'.
