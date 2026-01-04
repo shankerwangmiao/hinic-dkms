@@ -9,6 +9,9 @@ jobs:
       fail-fast: false
       matrix:
         kernel:
+          - version: "v6.18"
+            patches: ""
+            assert_have_all: true
           - version: "v6.12"
             patches: ""
             assert_have_all: true

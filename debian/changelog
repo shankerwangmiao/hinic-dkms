@@ -1,3 +1,9 @@
+hinic (0+git20250605+6.6.0-95.0.0-3) UNRELEASED; urgency=low
+
+  *
+
+ -- Miao Wang <shankerwangmiao@gmail.com>  Sun, 04 Jan 2026 18:22:43 +0800
+
 hinic (0+git20250605+6.6.0-95.0.0-2) unstable; urgency=low
 
   * Add patches for compatibility with 6.6, 6.1, 5.15, 5.10, 5.4 kernels
