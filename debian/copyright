@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hinic
 Source: https://gitee.com/openeuler/kernel/tree/OLK-6.6/drivers/net/ethernet/huawei/hinic
 
