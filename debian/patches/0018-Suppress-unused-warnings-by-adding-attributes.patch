@@ -1,6 +1,6 @@
 From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 20:54:30 +0800
-Subject: Supress unused warnings by adding attributes
+Subject: Suppress unused warnings by adding attributes
 
 ---
  hinic/hinic_lld.c             |  2 +-

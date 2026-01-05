@@ -16,6 +16,6 @@
 0015-Fix-build-error-for-API-change-in-ethtool_get_coales.patch
 0016-Fix-build-error-for-API-change-in-ndo_tx_timeout.patch
 0017-Fix-build-error-for-API-change-in-ethtool_supported_.patch
-0018-Supress-unused-warnings-by-adding-attributes.patch
+0018-Suppress-unused-warnings-by-adding-attributes.patch
 0019-Fix-build-error-for-API-change-in-timer.patch
 0021-Fix-build-error-for-API-change-in-GRO-and-NAPI-layer.patch
