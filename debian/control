@@ -1,4 +1,4 @@
-Source: hinic
+Source: hinic-dkms
 Section: kernel
 Maintainer: Miao Wang <shankerwangmiao@gmail.com>
 Uploaders: Shengqi Chen <harry@debian.org>
