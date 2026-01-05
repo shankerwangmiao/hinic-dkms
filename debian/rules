@@ -4,20 +4,9 @@
 #export DH_VERBOSE=1
 
 include /usr/share/dpkg/pkg-info.mk
-PKG_VER = $(DEB_VERSION_UPSTREAM)
-MOD_NAME = hinic
-pkgname = $(MOD_NAME)-dkms
 
 %:
-	dh $@ --with dkms
+	dh $@
 
 override_dh_install:
-	sed -e "s/DEB_VERSION_UPSTREAM/$(DEB_VERSION_UPSTREAM)/g" debian/install.in > debian/install
-	dh_install
-
-override_dh_clean:
-	-rm -rf hinic/Kbuild debian/install
-	dh_clean
-
-override_dh_dkms:
-	dh_dkms -p$(pkgname) -V $(PKG_VER)
+	INSTALL_VERSION=$(DEB_VERSION_UPSTREAM) dh_install

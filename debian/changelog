@@ -2,6 +2,7 @@ hinic (0+git20250605+6.6.0-95.0.0-3) UNRELEASED; urgency=low
 
   * Add patches for compatibility with 6.18 kernels
   * Fix copyright and license information in debian/copyright
+  * Initial release. (Closes: #1124670)
 
  -- Miao Wang <shankerwangmiao@gmail.com>  Sun, 04 Jan 2026 18:22:43 +0800
 

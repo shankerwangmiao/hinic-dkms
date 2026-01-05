@@ -1,13 +1,20 @@
 Source: hinic
 Section: kernel
-Priority: extra
 Maintainer: Miao Wang <shankerwangmiao@gmail.com>
-Build-Depends: debhelper (>= 9), dh-dkms | dkms
-Standards-Version: 3.9.4
+Build-Depends: debhelper-compat (= 13), dh-sequence-dkms
+Standards-Version: 4.7.3
 Homepage: https://gitee.com/openeuler/kernel/tree/OLK-6.6/drivers/net/ethernet/huawei/hinic
+Testsuite: autopkgtest-pkg-dkms
+Vcs-Git: https://salsa.debian.org/shankerwangmiao/hinic-dkms.git
+Vcs-Browser: https://salsa.debian.org/shankerwangmiao/hinic-dkms
 
 Package: hinic-dkms
 Architecture: all
 Depends: ${misc:Depends}, dkms
-Description: Huawei HiNIC PCI Express Linux driver
- Huawei HiNIC PCI Express Linux driver
+Description: DKMS Driver for Huawei HiNIC family
+ HiNIC is a network interface card for the Data Center Area developed by
+ Huawei. This package provides the DKMS source files obtained from the
+ OpenEuler kernel source tree, which is different from the driver integrated
+ in the mainline Linux kernel. It provides more features and an interface
+ for advanced management tools which can be used to configure and monitor
+ the device. This driver also extends support for more architectures.

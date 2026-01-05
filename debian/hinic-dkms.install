@@ -1,0 +1,2 @@
+hinic/* usr/src/hinic-${env:INSTALL_VERSION}
+debian/dkms_build usr/src/hinic-${env:INSTALL_VERSION}
