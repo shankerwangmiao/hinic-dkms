@@ -1,0 +1,53 @@
+name: Check Upstream Update
+
+on:
+  schedule:
+    - cron: '33 22 * * *' # Runs every day at 06:33 UTC+8
+  workflow_dispatch:
+
+env:
+  OEUPSTREAM_REPO: "https://atomgit.com/openeuler/kernel.git"
+  OEUPSTREAM_BRANCH: "OLK-6.6"
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch upstream kernel
+        id: fetch_upstream
+        run: |
+          git remote add upstream "$OEUPSTREAM_REPO"
+          git fetch --depth=1 --no-tags upstream "refs/heads/$OEUPSTREAM_BRANCH:refs/remotes/upstream/$OEUPSTREAM_BRANCH"
+          echo "UPSTREAM_COMMIT=$(git rev-parse --short "upstream/$OEUPSTREAM_BRANCH")" >> "$GITHUB_ENV"
+
+      - name: Check for updates
+        id: check_update
+        run: |
+          LOCAL_TREE=$(git rev-parse HEAD:hinic)
+          UPSTREAM_TREE=$(git rev-parse "upstream/$OEUPSTREAM_BRANCH:drivers/net/ethernet/huawei/hinic")
+          if [ "$LOCAL_TREE" = "$UPSTREAM_TREE" ]; then
+            echo "The hinic directory is up to date with upstream."
+            echo "have_update=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "The hinic directory is not up to date with upstream."
+          echo "have_update=true" >> "$GITHUB_OUTPUT"
+          git fetch --depth=1 --no-tags origin refs/heads/upstream:refs/remotes/origin/upstream
+          git checkout -b upstream origin/upstream
+          git rm --force -r hinic
+          git read-tree --prefix=hinic -u "$UPSTREAM_TREE"
+
+      - name: Make Pull Request
+        uses: peter-evans/create-pull-request@v6
+        if: steps.check_update.outputs.have_update == 'true'
+        with:
+          title: "Update hinic directory from upstream ${{ env.OEUPSTREAM_BRANCH }}"
+          commit-message: "Update hinic directory from upstream ${{ env.OEUPSTREAM_BRANCH }} commit ${{ steps.fetch_upstream.outputs.UPSTREAM_COMMIT }}"
+          author: 'GitHub Actions <41898282+github-actions[bot]@users.noreply.github.com>'
+          branch: "update-hinic-from-upstream-${{ env.OEUPSTREAM_BRANCH }}"
+          branch-suffix: "random"
+          delete-branch: true
+          base: upstream
