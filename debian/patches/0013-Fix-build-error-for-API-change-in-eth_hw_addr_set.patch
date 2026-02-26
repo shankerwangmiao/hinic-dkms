@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 04:23:31 +0800
 Subject: Fix build error for API change in eth_hw_addr_set
 
+Forwarded: not-needed
 ---
  hinic/Makefile                       |  1 +
  hinic/feature_test_eth_hw_addr_set.c | 10 ++++++++++

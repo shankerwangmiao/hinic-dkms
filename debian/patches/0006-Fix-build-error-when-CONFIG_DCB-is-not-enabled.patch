@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 10 Jul 2025 19:00:56 +0800
 Subject: Fix build error when CONFIG_DCB is not enabled
 
+Forwarded: no
 ---
  hinic/hinic_main.c    | 2 ++
  hinic/hinic_nic_dev.h | 1 +

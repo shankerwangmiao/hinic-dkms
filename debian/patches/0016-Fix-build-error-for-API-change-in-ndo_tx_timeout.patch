@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 05:06:10 +0800
 Subject: Fix build error for API change in ndo_tx_timeout
 
+Forwarded: not-needed
 ---
  hinic/Makefile                          | 1 +
  hinic/feature_test_ndo_tx_timeout_two.c | 7 +++++++

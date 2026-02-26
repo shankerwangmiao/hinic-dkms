@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 20:54:30 +0800
 Subject: Suppress unused warnings by adding attributes
 
+Forwarded: not-needed
 ---
  hinic/hinic_lld.c             |  2 +-
  hinic/hinic_main.c            |  2 ++

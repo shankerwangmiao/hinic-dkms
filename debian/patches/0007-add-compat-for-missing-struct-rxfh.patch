@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 10 Jul 2025 20:31:16 +0800
 Subject: add compat for missing struct rxfh
 
+Forwarded: not-needed
 ---
  hinic/Makefile                   |  4 ++++
  hinic/feature_test_struct_rxfh.c |  4 ++++

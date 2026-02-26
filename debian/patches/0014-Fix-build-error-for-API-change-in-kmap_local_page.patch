@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 04:33:44 +0800
 Subject: Fix build error for API change in kmap_local_page
 
+Forwarded: not-needed
 ---
  hinic/Makefile                       |  2 ++
  hinic/feature_test_kmap_local_page.c |  8 ++++++++

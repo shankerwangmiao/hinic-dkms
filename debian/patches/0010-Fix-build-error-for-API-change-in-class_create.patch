@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 00:35:45 +0800
 Subject: Fix build error for API change in class_create
 
+Forwarded: not-needed
 ---
  hinic/Makefile                     | 3 +++
  hinic/feature_test_add_class_one.c | 7 +++++++

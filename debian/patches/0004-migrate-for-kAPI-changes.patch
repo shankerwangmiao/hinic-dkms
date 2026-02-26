@@ -4,6 +4,8 @@ Subject: migrate for kAPI changes
 
 in commit fb6e30a72539 ("net: ethtool: pass a pointer to parameters to
 get/set_rxfh ethtool ops)
+
+Forwarded: not-needed
 ---
  hinic/hinic_ethtool.c | 31 ++++++++++++++++---------------
  1 file changed, 16 insertions(+), 15 deletions(-)

@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 5 Jun 2025 19:01:54 +0800
 Subject: Kconfig: enable compiling on all arches
 
+Forwarded: not-needed
 ---
  hinic/Kconfig | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

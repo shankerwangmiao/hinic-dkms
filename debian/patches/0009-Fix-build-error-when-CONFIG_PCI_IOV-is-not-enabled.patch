@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Thu, 10 Jul 2025 23:38:22 +0800
 Subject: Fix build error when CONFIG_PCI_IOV is not enabled
 
+Forwarded: no
 ---
  hinic/hinic_lld.c | 2 ++
  1 file changed, 2 insertions(+)

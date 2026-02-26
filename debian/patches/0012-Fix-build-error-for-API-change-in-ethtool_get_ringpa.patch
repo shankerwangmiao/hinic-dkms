@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 01:16:36 +0800
 Subject: Fix build error for API change in ethtool_get_ringparam
 
+Forwarded: not-needed
 ---
  hinic/Makefile                                  |  1 +
  hinic/feature_test_ethtool_get_ringparam_four.c | 12 ++++++++++++

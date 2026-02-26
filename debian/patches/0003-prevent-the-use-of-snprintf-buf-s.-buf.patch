@@ -3,6 +3,8 @@ Date: Thu, 5 Jun 2025 19:06:26 +0800
 Subject: prevent the use of snprintf(buf, , "%s...", buf, ...)
 
 which is UB
+
+Forwarded: no
 ---
  hinic/hinic_ethtool.c |  9 ++++++---
  hinic/hinic_hwdev.c   | 25 +++++++++++++++----------

@@ -3,6 +3,8 @@ Date: Thu, 5 Jun 2025 19:04:31 +0800
 Subject: add static specifier to local symbols
 
 To fix the no previous prototype warnings
+
+Forwarded: no
 ---
  hinic/hinic_cfg.c             |  4 ++--
  hinic/hinic_cmdq.c            |  2 +-

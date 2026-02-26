@@ -3,6 +3,7 @@ Date: Thu, 5 Jun 2025 19:10:58 +0800
 Subject: use skb_frag_off* functions instead of directly access to the
  members
 
+Forwarded: not-needed
 ---
  hinic/hinic_rx.c | 2 +-
  hinic/hinic_tx.c | 2 +-

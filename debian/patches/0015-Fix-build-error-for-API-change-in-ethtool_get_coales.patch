@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Fri, 11 Jul 2025 04:44:32 +0800
 Subject: Fix build error for API change in ethtool_get_coalesce
 
+Forwarded: not-needed
 ---
  hinic/Makefile                                 |  1 +
  hinic/feature_test_ethtool_get_coalesce_four.c | 12 ++++++++++++

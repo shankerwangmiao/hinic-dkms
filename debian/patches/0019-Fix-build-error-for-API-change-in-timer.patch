@@ -2,6 +2,7 @@ From: Miao Wang <shankerwangmiao@gmail.com>
 Date: Sun, 4 Jan 2026 18:17:44 +0800
 Subject: Fix build error for API change in timer
 
+Forwarded: not-needed
 ---
  hinic/Makefile                         |  3 +++
  hinic/feature_test_timer_delete_sync.c |  7 +++++++
