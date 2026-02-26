@@ -6,8 +6,8 @@ Build-Depends: debhelper-compat (= 13), dh-sequence-dkms
 Standards-Version: 4.7.3
 Homepage: https://gitee.com/openeuler/kernel/tree/OLK-6.6/drivers/net/ethernet/huawei/hinic
 Testsuite: autopkgtest-pkg-dkms
-Vcs-Git: https://salsa.debian.org/shankerwangmiao/hinic-dkms.git
-Vcs-Browser: https://salsa.debian.org/shankerwangmiao/hinic-dkms
+Vcs-Git: https://salsa.debian.org/debian/hinic-dkms.git
+Vcs-Browser: https://salsa.debian.org/debian/hinic-dkms
 
 Package: hinic-dkms
 Architecture: all

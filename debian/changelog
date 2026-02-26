@@ -2,6 +2,7 @@ hinic-dkms (0+git20250605+6.6.0-95.0.0-4) UNRELEASED; urgency=medium
 
   * d/copyright: update the url in Format: to https
   * d/p: fix spelling issue
+  * d/c: update URL of the git repo
 
  -- Miao Wang <shankerwangmiao@gmail.com>  Mon, 05 Jan 2026 21:17:19 +0800
 
